@@ -98,7 +98,7 @@ function TopAdBanner() {
         <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
+            className="absolute bottom-2 right-1/2 transform translate-x-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
             onClick={() => setIsExpanded(!isExpanded)}
         >
             {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -116,7 +116,7 @@ export default function AppLayout({
 }) {
   const pathname = usePathname();
   // In a real app, this would be based on a proper auth session
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const isHomePage = pathname === '/';
   const hideSidebar = isHomePage && !isAuthenticated;
@@ -238,7 +238,7 @@ export default function AppLayout({
   const adFooter = <AdBanner image={bottomAdImage} className="mt-auto" />;
 
 
-  if (hideSidebar) {
+  if (isHomePage && !isAuthenticated) {
     return (
       <div className="flex min-h-screen w-full flex-col">
         {header}
