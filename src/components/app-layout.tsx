@@ -99,7 +99,7 @@ function TopAdBanner() {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-2 right-1/2 transform translate-x-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
+        className="absolute bottom-2 right-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
