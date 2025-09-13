@@ -100,10 +100,9 @@ function TopAdBanner() {
         variant="ghost"
         size="icon"
         className={cn(
-          'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10',
-          isExpanded ? 'bottom-2' : 'bottom-auto'
+          'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10 transition-all',
+           isExpanded ? 'bottom-2' : 'bottom-[-3.5rem]'
         )}
-        style={{ top: isExpanded ? undefined : '0rem' }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -225,7 +224,7 @@ function AppLayoutContent({
           ) : (
              <div className="flex items-center gap-2">
                <Button variant="outline" onClick={() => setIsAuthenticated(true)}>تسجيل الدخول</Button>
-               <Button>إنشاء حساب</Button>
+               <Button variant="outline">إنشاء حساب</Button>
              </div>
           )}
         </div>
@@ -285,7 +284,7 @@ function AppLayoutContent({
                   onClick={item.action}
                 >
                   {item.href && item.href !== '#' ? (
-                     <Link href={item.href}>
+                    <Link href={item.href}>
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>
