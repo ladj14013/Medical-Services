@@ -50,6 +50,14 @@ const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
 );
 
+function AdBanner({ text, className }: { text: string, className?: string }) {
+    return (
+        <div className={cn("bg-muted text-muted-foreground text-center p-4", className)}>
+            <p>{text}</p>
+        </div>
+    )
+}
+
 export default function AppLayout({
   children,
 }: {
@@ -169,12 +177,23 @@ export default function AppLayout({
         </div>
       </header>
   );
+  
+  const mainContent = (
+    <main className="flex flex-1 flex-col">
+        {children}
+    </main>
+  );
+
+  const adFooter = <AdBanner text="منطقة الإعلان السفلى" className="mt-auto" />;
+
 
   if (hideSidebar) {
     return (
       <div className="flex min-h-screen w-full flex-col">
         {header}
-        <main className="flex flex-1 flex-col">{children}</main>
+        <AdBanner text="منطقة الإعلان العلوى" />
+        {mainContent}
+        {adFooter}
       </div>
     );
   }
@@ -230,9 +249,11 @@ export default function AppLayout({
           {/* Footer content if any */}
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
+      <SidebarInset className="flex flex-col">
        {header}
-        {children}
+       <AdBanner text="منطقة الإعلان العلوى" />
+        {mainContent}
+        {adFooter}
       </SidebarInset>
     </SidebarProvider>
   );
