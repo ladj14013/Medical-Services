@@ -1,16 +1,9 @@
 import type { Metadata } from 'next';
-import { Cairo } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '700'],
-  variable: '--font-sans',
-});
-
 export const metadata: Metadata = {
-  title: 'صحة تك',
+  title: 'الخدمات الطبية',
   description: 'ابحث واحجز موعدك التالي مع الطبيب.',
 };
 
@@ -25,7 +18,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
