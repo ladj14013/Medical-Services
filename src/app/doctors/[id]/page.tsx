@@ -1,0 +1,77 @@
+import AppLayout from '@/components/app-layout';
+import BookingClient from '@/components/doctors/booking-client';
+import { doctors } from '@/lib/data';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import data from '@/lib/placeholder-images.json';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MapPin, Stethoscope } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+
+export default function DoctorProfilePage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const doctor = doctors.find((doc) => doc.id === params.id);
+
+  if (!doctor) {
+    notFound();
+  }
+
+  const doctorImage = data.placeholderImages.find(
+    (img) => img.id === doctor.imageId
+  );
+
+  return (
+    <AppLayout>
+      <div className="flex-1 space-y-4 p-4 sm:p-8">
+        <div className="grid gap-8 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-6">
+            <Card className="overflow-hidden">
+              <CardContent className="p-6 text-center">
+                 <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-primary/20">
+                  {doctorImage && (
+                    <AvatarImage
+                      src={doctorImage.imageUrl}
+                      alt={doctorImage.description}
+                      width={128}
+                      height={128}
+                      data-ai-hint={doctorImage.imageHint}
+                      className="object-cover"
+                    />
+                  )}
+                  <AvatarFallback className='text-4xl'>{doctor.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <h1 className="text-3xl font-bold font-headline">{doctor.name}</h1>
+                 <p className="flex items-center justify-center gap-2 text-muted-foreground mt-1">
+                    <Stethoscope className="w-5 h-5" />
+                    {doctor.specialization}
+                </p>
+                <p className="flex items-center justify-center gap-2 text-muted-foreground mt-1">
+                    <MapPin className="w-5 h-5" />
+                    {doctor.location}
+                </p>
+              </CardContent>
+            </Card>
+             <Card>
+                <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold font-headline mb-2">About</h2>
+                    <p className="text-muted-foreground">{doctor.bio}</p>
+                </CardContent>
+            </Card>
+          </div>
+          <div className="md:col-span-2">
+            <BookingClient doctor={doctor} />
+          </div>
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+export async function generateStaticParams() {
+  return doctors.map((doctor) => ({
+    id: doctor.id,
+  }));
+}

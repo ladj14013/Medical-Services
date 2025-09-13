@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "doctor-1",
+      "description": "Portrait of Dr. Evelyn Reed",
+      "imageUrl": "https://picsum.photos/seed/doc1/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-2",
+      "description": "Portrait of Dr. Marcus Thorne",
+      "imageUrl": "https://picsum.photos/seed/doc2/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-3",
+      "description": "Portrait of Dr. Anya Sharma",
+      "imageUrl": "https://picsum.photos/seed/doc3/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-4",
+      "description": "Portrait of Dr. Julian Chen",
+      "imageUrl": "https://picsum.photos/seed/doc4/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-5",
+      "description": "Portrait of Dr. Sofia Rossi",
+      "imageUrl": "https://picsum.photos/seed/doc5/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-6",
+      "description": "Portrait of Dr. Ben Carter",
+      "imageUrl": "https://picsum.photos/seed/doc6/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Current user's avatar",
+      "imageUrl": "https://picsum.photos/seed/user1/40/40",
+      "imageHint": "person"
+    }
+  ]
 }
