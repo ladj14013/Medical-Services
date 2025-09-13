@@ -59,11 +59,11 @@ export default function AppLayout({
   const menuItems = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
     // The user doesn't want to see these when not logged in.
-    // { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
-    // { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
+    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
 
-  const isAuthenticated = false; // This can be replaced with actual auth state logic
+  const isAuthenticated = true; // This can be replaced with actual auth state logic
 
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -182,6 +182,19 @@ export default function AppLayout({
     );
   }
 
+  const authenticatedMenu = [
+    { href: '/', label: 'البحث عن طبيب', icon: Search },
+    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
+    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+  ];
+
+  const unauthenticatedMenu = [
+    { href: '/', label: 'البحث عن طبيب', icon: Search },
+  ]
+
+  const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
+
+
   return (
     <SidebarProvider>
       <Sidebar side="right">
@@ -190,7 +203,7 @@ export default function AppLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {menuItems.map((item) => (
+            {currentMenuItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <Link href={item.href} passHref legacyBehavior>
                   <SidebarMenuButton
