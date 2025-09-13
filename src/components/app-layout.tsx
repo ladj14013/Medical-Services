@@ -10,7 +10,8 @@ import {
   Search,
   UserPlus,
   User as UserIcon,
-  X,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -83,34 +84,27 @@ function AdBanner({ image, className }: { image?: { imageUrl: string, descriptio
 }
 
 function TopAdBanner() {
-  const [isVisible, setIsVisible] = useState(true);
-
-  if (!isVisible) {
-    return null;
-  }
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <AnimatePresence>
-      {isVisible && (
+    <div className="relative bg-muted overflow-hidden">
         <motion.div
-          initial={{ height: '12rem', opacity: 1 }}
-          exit={{ height: 0, opacity: 0, marginTop: 0 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-          className="relative overflow-hidden"
+            animate={{ height: isExpanded ? '12rem' : '0rem', opacity: isExpanded ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            className="overflow-hidden"
         >
-          <AdBanner image={topAdImage} />
-          <Button
+            <AdBanner image={topAdImage} />
+        </motion.div>
+        <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8"
-            onClick={() => setIsVisible(false)}
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">إخفاء الإعلان</span>
-          </Button>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
+            onClick={() => setIsExpanded(!isExpanded)}
+        >
+            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <span className="sr-only">{isExpanded ? 'إخفاء الإعلان' : 'إظهار الإعلان'}</span>
+        </Button>
+    </div>
   );
 }
 
