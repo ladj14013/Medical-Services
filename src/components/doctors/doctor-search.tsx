@@ -18,85 +18,55 @@ interface DoctorSearchProps {
 
 export default function DoctorSearch({ doctors }: DoctorSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [specialization, setSpecialization] = useState('all');
-  const [location, setLocation] = useState('');
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
 
-  const specializations = [
-    'all',
-    ...Array.from(new Set(doctors.map((doc) => doc.specialization))),
-  ];
-  
-  const translatedSpecializations: {[key: string]: string} = {
-    'all': 'جميع التخصصات',
-    'Cardiology': 'طب القلب',
-    'Dermatology': 'الأمراض الجلدية',
-    'Pediatrics': 'طب الأطفال',
-    'Neurology': 'طب الأعصاب',
+  const handleSearch = () => {
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    const results = doctors.filter((doctor) => {
+      return (
+        doctor.name.toLowerCase().includes(lowercasedSearchTerm) ||
+        doctor.specialization.toLowerCase().includes(lowercasedSearchTerm) ||
+        doctor.location.toLowerCase().includes(lowercasedSearchTerm)
+      );
+    });
+    setFilteredDoctors(results);
   };
-
-  const filteredDoctors = doctors.filter((doctor) => {
-    return (
-      (doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (specialization === 'all' || doctor.specialization === specialization) &&
-      doctor.location.toLowerCase().includes(location.toLowerCase())
-    );
-  });
   
   const handleClear = () => {
     setSearchTerm('');
-    setSpecialization('all');
-    setLocation('');
+    setFilteredDoctors(doctors);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="p-4 bg-card border rounded-lg shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div className="md:col-span-2 space-y-2">
+          <div className="md:col-span-3 space-y-2">
             <label htmlFor="search" className="text-sm font-medium">
-              البحث بالاسم أو التخصص
+              البحث بالاسم أو التخصص أو الموقع
             </label>
             <Input
               id="search"
-              placeholder="مثال: د. ريد أو طب القلب"
+              placeholder="مثال: د. ريد، طب القلب، أو سبرينغفيلد"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
-          <div className="space-y-2">
-            <label htmlFor="specialization" className="text-sm font-medium">
-              التخصص
-            </label>
-            <Select value={specialization} onValueChange={setSpecialization}>
-              <SelectTrigger id="specialization">
-                <SelectValue placeholder="جميع التخصصات" />
-              </SelectTrigger>
-              <SelectContent>
-                {specializations.map((spec) => (
-                  <SelectItem key={spec} value={spec}>
-                    {translatedSpecializations[spec] || spec}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="location" className="text-sm font-medium">
-              الموقع
-            </label>
-            <Input
-              id="location"
-              placeholder="مثال: سبرينغفيلد، إلينوي"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-           <div className="md:col-start-4">
-             <Button onClick={handleClear} variant="outline" className="w-full">
-              مسح الفلاتر
+          <div className="grid grid-cols-2 gap-2 md:col-span-1">
+            <Button onClick={handleSearch} className="w-full">
+              بحث
             </Button>
-           </div>
+            <Button onClick={handleClear} variant="outline" className="w-full">
+              مسح
+            </Button>
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
