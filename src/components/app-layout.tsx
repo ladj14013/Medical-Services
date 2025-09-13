@@ -50,14 +50,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: '/', label: 'Doctor Search', icon: Search },
-    { href: '/dashboard', label: 'My Appointments', icon: LayoutGrid },
-    { href: '/profile', label: 'Profile', icon: UserIcon },
+    { href: '/', label: 'البحث عن طبيب', icon: Search },
+    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
+    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar side="right">
         <SidebarHeader>
           <Logo />
         </SidebarHeader>
@@ -95,15 +95,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Bell />
-                  <span className="sr-only">Notifications</span>
+                  <span className="sr-only">الإشعارات</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-80">
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Notifications</h4>
+                    <h4 className="font-medium leading-none">الإشعارات</h4>
                     <p className="text-sm text-muted-foreground">
-                      You have 2 new messages.
+                      لديك رسالتان جديدتان.
                     </p>
                   </div>
                   <div className="grid gap-2">
@@ -111,10 +111,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
                       <div className="grid gap-1">
                         <p className="text-sm font-medium">
-                          Appointment Reminder
+                          تذكير بالموعد
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Your appointment with Dr. Reed is tomorrow.
+                          موعدك مع د. ريد غدًا.
                         </p>
                       </div>
                     </div>
@@ -122,10 +122,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
                       <div className="grid gap-1">
                         <p className="text-sm font-medium">
-                          New Message
+                          رسالة جديدة
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Dr. Sharma sent you a message.
+                          أرسل لك د. شارما رسالة.
                         </p>
                       </div>
                     </div>
@@ -165,16 +165,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/profile" className="w-full">
-                    Profile
+                    ملفي الشخصي
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/dashboard" className="w-full">
-                    Appointments
+                    المواعيد
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

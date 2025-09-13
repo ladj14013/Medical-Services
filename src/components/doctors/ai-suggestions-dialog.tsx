@@ -40,13 +40,13 @@ export default function AiSuggestionsDialog({
           const result = await suggestAlternateAppointments({
             preferredDoctorSpecialization: doctor.specialization,
             preferredTimeSlot,
-            userPreferences: 'Same location if possible.',
+            userPreferences: 'نفس الموقع إن أمكن.',
             unavailableDoctors: [doctor.id],
           });
           setSuggestions(result.alternateSuggestions);
         } catch (error) {
           console.error('AI suggestion error:', error);
-          setSuggestions(['We could not find any alternatives at this moment.']);
+          setSuggestions(['لم نتمكن من العثور على أي بدائل في الوقت الحالي.']);
         } finally {
           setIsLoading(false);
         }
@@ -59,8 +59,8 @@ export default function AiSuggestionsDialog({
   const handleSelectSuggestion = (suggestion: string) => {
     setIsOpen(false);
     toast({
-      title: 'Appointment Booked!',
-      description: `Your appointment for: "${suggestion}" has been confirmed.`,
+      title: 'تم حجز الموعد!',
+      description: `تم تأكيد موعدك لـ: "${suggestion}".`,
     })
   }
 
@@ -68,10 +68,9 @@ export default function AiSuggestionsDialog({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Alternate Appointments</DialogTitle>
+          <DialogTitle>مواعيد بديلة</DialogTitle>
           <DialogDescription>
-            The selected time is unavailable. Here are some AI-powered
-            suggestions.
+            الوقت المختار غير متاح. إليك بعض الاقتراحات المدعومة بالذكاء الاصطناعي.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -91,7 +90,7 @@ export default function AiSuggestionsDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Close
+            إغلاق
           </Button>
         </DialogFooter>
       </DialogContent>

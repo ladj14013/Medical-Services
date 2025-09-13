@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
-import { PT_Sans } from 'next/font/google';
+import { Cairo } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
-const ptSans = PT_Sans({
-  subsets: ['latin'],
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
   weight: ['400', '700'],
   variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
-  title: 'SehaTech',
-  description: 'Find and book your next doctor appointment.',
+  title: 'صحة تك',
+  description: 'ابحث واحجز موعدك التالي مع الطبيب.',
 };
 
 export default function RootLayout({
@@ -20,12 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>

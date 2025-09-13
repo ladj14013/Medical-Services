@@ -56,7 +56,7 @@ export default function DoctorProfilePage({
             </Card>
              <Card>
                 <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold font-headline mb-2">About</h2>
+                    <h2 className="text-xl font-semibold font-headline mb-2">حول</h2>
                     <p className="text-muted-foreground">{doctor.bio}</p>
                 </CardContent>
             </Card>

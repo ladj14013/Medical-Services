@@ -19,8 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/hooks/use-toast';
 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.string().email('Invalid email address.'),
+  name: z.string().min(2, 'يجب أن يتكون الاسم من حرفين على الأقل.'),
+  email: z.string().email('عنوان بريد إلكتروني غير صالح.'),
   medicalHistory: z.string().optional(),
 });
 
@@ -41,16 +41,16 @@ export default function ProfileForm() {
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
     toast({
-      title: 'Profile Updated',
-      description: 'Your personal information has been saved.',
+      title: 'تم تحديث الملف الشخصي',
+      description: 'تم حفظ معلوماتك الشخصية.',
     });
   }
 
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>Update your personal details and medical history here.</CardDescription>
+            <CardTitle>المعلومات الشخصية</CardTitle>
+            <CardDescription>قم بتحديث بياناتك الشخصية وتاريخك الطبي هنا.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
@@ -60,9 +60,9 @@ export default function ProfileForm() {
                 name="name"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>الاسم الكامل</FormLabel>
                     <FormControl>
-                        <Input placeholder="Your Name" {...field} />
+                        <Input placeholder="اسمك" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -73,7 +73,7 @@ export default function ProfileForm() {
                 name="email"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>عنوان البريد الإلكتروني</FormLabel>
                     <FormControl>
                         <Input type="email" placeholder="your@email.com" {...field} />
                     </FormControl>
@@ -86,10 +86,10 @@ export default function ProfileForm() {
                 name="medicalHistory"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Medical History</FormLabel>
+                    <FormLabel>التاريخ الطبي</FormLabel>
                     <FormControl>
                         <Textarea
-                        placeholder="e.g., Allergies, past surgeries..."
+                        placeholder="مثال: الحساسية، العمليات الجراحية السابقة ..."
                         className="resize-none"
                         {...field}
                         />
@@ -98,7 +98,7 @@ export default function ProfileForm() {
                     </FormItem>
                 )}
                 />
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">حفظ التغييرات</Button>
             </form>
             </Form>
         </CardContent>

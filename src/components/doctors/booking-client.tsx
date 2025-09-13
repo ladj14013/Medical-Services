@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { addDays, format, isBefore } from 'date-fns';
+import { ar } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -37,8 +38,8 @@ export default function BookingClient({ doctor }: BookingClientProps) {
   const handleBooking = () => {
     if (!date || !selectedTime) {
       toast({
-        title: 'Incomplete Selection',
-        description: 'Please select a date and time.',
+        title: 'اختيار غير مكتمل',
+        description: 'الرجاء اختيار التاريخ والوقت.',
         variant: 'destructive',
       });
       return;
@@ -47,18 +48,18 @@ export default function BookingClient({ doctor }: BookingClientProps) {
     // Simulate a booked slot to trigger AI
     if (selectedTime === '10:00 AM' || selectedTime === '02:00 PM') {
       toast({
-        title: 'Booking Failed',
+        title: 'فشل الحجز',
         description:
-          'This time slot is no longer available. We are looking for alternatives.',
+          'هذا الوقت لم يعد متاحًا. نحن نبحث عن بدائل.',
         variant: 'destructive',
       });
       setAiDialogOpen(true);
     } else {
       toast({
-        title: 'Appointment Booked!',
-        description: `Your appointment with ${
+        title: 'تم حجز الموعد!',
+        description: `تم تأكيد موعدك مع ${
           doctor.name
-        } on ${format(date, 'PPP')} at ${selectedTime} is confirmed.`,
+        } في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
       });
       // Here you would typically update the backend
       setSelectedTime('');
@@ -69,12 +70,12 @@ export default function BookingClient({ doctor }: BookingClientProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Book an Appointment</CardTitle>
+          <CardTitle className="text-2xl font-headline">احجز موعدًا</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>1. Select a Date</Label>
+              <Label>١. اختر تاريخًا</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -84,8 +85,8 @@ export default function BookingClient({ doctor }: BookingClientProps) {
                       !date && 'text-muted-foreground'
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                    <CalendarIcon className="ml-2 h-4 w-4" />
+                    {date ? format(date, 'PPP', { locale: ar }) : <span>اختر تاريخًا</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -98,12 +99,13 @@ export default function BookingClient({ doctor }: BookingClientProps) {
                     }}
                     initialFocus
                     disabled={(day) => isBefore(day, new Date())}
+                    locale={ar}
                   />
                 </PopoverContent>
               </Popover>
             </div>
             <div className="space-y-2">
-              <Label>2. Select a Time</Label>
+              <Label>٢. اختر وقتًا</Label>
               {availableTimes.length > 0 ? (
                 <RadioGroup
                   value={selectedTime}
@@ -134,7 +136,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
               ) : (
                 <div className="flex items-center justify-center h-full p-4 border rounded-md bg-muted/50">
                   <p className="text-muted-foreground">
-                    No available times for this date.
+                    لا توجد أوقات متاحة في هذا التاريخ.
                   </p>
                 </div>
               )}
@@ -145,7 +147,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
             disabled={!date || !selectedTime}
             className="w-full text-lg py-6"
           >
-            Confirm Booking
+            تأكيد الحجز
           </Button>
         </CardContent>
       </Card>

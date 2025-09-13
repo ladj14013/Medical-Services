@@ -9,6 +9,7 @@ import { Calendar, Clock, Stethoscope } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 export default function AppointmentList() {
   const [appointments, setAppointments] =
@@ -22,8 +23,8 @@ export default function AppointmentList() {
       )
     );
     toast({
-      title: 'Appointment Cancelled',
-      description: 'Your appointment has been successfully cancelled.',
+      title: 'تم إلغاء الموعد',
+      description: 'تم إلغاء موعدك بنجاح.',
     });
   };
 
@@ -47,7 +48,7 @@ export default function AppointmentList() {
                     {apt.doctorSpecialization}
                   </p>
                 </div>
-                <Badge variant="secondary">Upcoming</Badge>
+                <Badge variant="secondary">قادم</Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -55,7 +56,7 @@ export default function AppointmentList() {
                 <div className="flex flex-wrap gap-4 sm:gap-6">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-primary" />
-                    <span>{format(new Date(apt.date), 'MMMM d, yyyy')}</span>
+                    <span>{format(new Date(apt.date), 'd MMMM yyyy', { locale: ar })}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-primary" />
@@ -63,12 +64,12 @@ export default function AppointmentList() {
                   </div>
                 </div>
                 <div className="flex gap-2 self-end sm:self-center">
-                  <Button variant="outline">Reschedule</Button>
+                  <Button variant="outline">إعادة الجدولة</Button>
                   <Button
                     variant="destructive"
                     onClick={() => handleCancel(apt.id)}
                   >
-                    Cancel
+                    إلغاء
                   </Button>
                 </div>
               </div>
@@ -77,7 +78,7 @@ export default function AppointmentList() {
         ))
       ) : (
         <Card className="text-center p-10">
-          <p className="text-muted-foreground">You have no upcoming appointments.</p>
+          <p className="text-muted-foreground">ليس لديك مواعيد قادمة.</p>
         </Card>
       )}
     </div>

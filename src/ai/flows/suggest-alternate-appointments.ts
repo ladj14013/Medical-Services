@@ -41,16 +41,16 @@ const prompt = ai.definePrompt({
   name: 'suggestAlternateAppointmentsPrompt',
   input: {schema: SuggestAlternateAppointmentsInputSchema},
   output: {schema: SuggestAlternateAppointmentsOutputSchema},
-  prompt: `You are an AI assistant helping users find alternate appointment times or doctors.
+  prompt: `أنت مساعد ذكاء اصطناعي تساعد المستخدمين في العثور على مواعيد أو أطباء بديلين.
 
-  The user's preferred doctor specialization is: {{{preferredDoctorSpecialization}}}.
-  The user's preferred time slot is: {{{preferredTimeSlot}}}.
-  The user's preferences are: {{{userPreferences}}}.
+  تخصص الطبيب المفضل لدى المستخدم هو: {{{preferredDoctorSpecialization}}}.
+  الوقت المفضل لدى المستخدم هو: {{{preferredTimeSlot}}}.
+  تفضيلات المستخدم هي: {{{userPreferences}}}.
 
-  Please suggest some alternate appointment times or doctors, taking into account the user's preferences.
-  Make sure to not suggest any of the following doctor IDs, because they are unavailable: {{{unavailableDoctors}}}.
+  يرجى اقتراح بعض المواعيد أو الأطباء البديلين، مع مراعاة تفضيلات المستخدم.
+  تأكد من عدم اقتراح أي من معرفات الأطباء التالية، لأنهم غير متاحين: {{{unavailableDoctors}}}.
 
-  Respond with a list of suggestions for alternate appointment times or doctors. The suggestions should be as specific as possible, including the doctor's name, specialization, and available time slots.`,
+  قم بالرد بقائمة من الاقتراحات لمواعيد أو أطباء بديلين. يجب أن تكون الاقتراحات محددة قدر الإمكان، بما في ذلك اسم الطبيب وتخصصه والمواعيد المتاحة.`,
 });
 
 const suggestAlternateAppointmentsFlow = ai.defineFlow(

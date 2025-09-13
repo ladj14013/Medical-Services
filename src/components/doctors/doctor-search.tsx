@@ -25,6 +25,14 @@ export default function DoctorSearch({ doctors }: DoctorSearchProps) {
     'all',
     ...Array.from(new Set(doctors.map((doc) => doc.specialization))),
   ];
+  
+  const translatedSpecializations: {[key: string]: string} = {
+    'all': 'جميع التخصصات',
+    'Cardiology': 'طب القلب',
+    'Dermatology': 'الأمراض الجلدية',
+    'Pediatrics': 'طب الأطفال',
+    'Neurology': 'طب الأعصاب',
+  };
 
   const filteredDoctors = doctors.filter((doctor) => {
     return (
@@ -47,27 +55,27 @@ export default function DoctorSearch({ doctors }: DoctorSearchProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="md:col-span-2 space-y-2">
             <label htmlFor="search" className="text-sm font-medium">
-              Search by Name or Specialization
+              البحث بالاسم أو التخصص
             </label>
             <Input
               id="search"
-              placeholder="e.g., Dr. Reed or Cardiology"
+              placeholder="مثال: د. ريد أو طب القلب"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <label htmlFor="specialization" className="text-sm font-medium">
-              Specialization
+              التخصص
             </label>
             <Select value={specialization} onValueChange={setSpecialization}>
               <SelectTrigger id="specialization">
-                <SelectValue placeholder="All Specializations" />
+                <SelectValue placeholder="جميع التخصصات" />
               </SelectTrigger>
               <SelectContent>
                 {specializations.map((spec) => (
                   <SelectItem key={spec} value={spec}>
-                    {spec === 'all' ? 'All Specializations' : spec}
+                    {translatedSpecializations[spec] || spec}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -75,18 +83,18 @@ export default function DoctorSearch({ doctors }: DoctorSearchProps) {
           </div>
           <div className="space-y-2">
             <label htmlFor="location" className="text-sm font-medium">
-              Location
+              الموقع
             </label>
             <Input
               id="location"
-              placeholder="e.g., Springfield, IL"
+              placeholder="مثال: سبرينغفيلد، إلينوي"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
            <div className="md:col-start-4">
              <Button onClick={handleClear} variant="outline" className="w-full">
-              Clear Filters
+              مسح الفلاتر
             </Button>
            </div>
         </div>
@@ -98,7 +106,7 @@ export default function DoctorSearch({ doctors }: DoctorSearchProps) {
           ))
         ) : (
           <div className="md:col-span-3 text-center text-muted-foreground py-10">
-            No doctors found matching your criteria.
+            لم يتم العثور على أطباء يطابقون معاييرك.
           </div>
         )}
       </div>
