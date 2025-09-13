@@ -60,7 +60,7 @@ export default function DoctorSearch({ doctors }: DoctorSearchProps) {
             />
           </div>
           <div className="grid grid-cols-2 gap-2 md:col-span-1">
-            <Button onClick={handleSearch} className="w-full">
+            <Button onClick={handleSearch} variant="accent" className="w-full">
               بحث
             </Button>
             <Button onClick={handleClear} variant="outline" className="w-full">
