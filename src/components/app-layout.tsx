@@ -239,12 +239,19 @@ function AppLayoutContent({
 
   const adFooter = <AdBanner image={bottomAdImage} className="mt-auto" />;
 
+  const appFooter = (
+    <footer className="border-t bg-background p-4 text-center text-sm text-muted-foreground">
+        © {new Date().getFullYear()} Medical Services. كل الحقوق محفوظة.
+    </footer>
+  );
+
   const homePageUnauthenticated = (
     <div className="flex min-h-screen w-full flex-col">
       {header}
       <TopAdBanner />
       {mainContent}
       {adFooter}
+      {appFooter}
     </div>
   );
 
@@ -308,6 +315,7 @@ function AppLayoutContent({
        <TopAdBanner />
         {mainContent}
         {adFooter}
+        {appFooter}
       </SidebarInset>
     </>
   );
