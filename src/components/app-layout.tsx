@@ -10,6 +10,7 @@ import {
   Search,
   UserPlus,
   User as UserIcon,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -46,6 +47,7 @@ import data from '@/lib/placeholder-images.json';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -64,7 +66,7 @@ function AdBanner({ image, className }: { image?: { imageUrl: string, descriptio
     return (
         <div className={cn("bg-muted text-muted-foreground text-center relative h-48", className)}>
             {image ? (
-                <Image 
+                <Image
                     src={image.imageUrl}
                     alt={image.description}
                     data-ai-hint={image.imageHint}
@@ -80,6 +82,39 @@ function AdBanner({ image, className }: { image?: { imageUrl: string, descriptio
     )
 }
 
+function TopAdBanner() {
+  const [isVisible, setIsVisible] = useState(true);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ height: '12rem', opacity: 1 }}
+          exit={{ height: 0, opacity: 0, marginTop: 0 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="relative overflow-hidden"
+        >
+          <AdBanner image={topAdImage} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8"
+            onClick={() => setIsVisible(false)}
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">إخفاء الإعلان</span>
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+
 export default function AppLayout({
   children,
 }: {
@@ -87,7 +122,7 @@ export default function AppLayout({
 }) {
   const pathname = usePathname();
   // In a real app, this would be based on a proper auth session
-  const [isAuthenticated, setIsAuthenticated] = useState(false); 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const isHomePage = pathname === '/';
   const hideSidebar = isHomePage && !isAuthenticated;
@@ -199,7 +234,7 @@ export default function AppLayout({
         </div>
       </header>
   );
-  
+
   const mainContent = (
     <main className="flex flex-1 flex-col">
         {children}
@@ -213,7 +248,7 @@ export default function AppLayout({
     return (
       <div className="flex min-h-screen w-full flex-col">
         {header}
-        <AdBanner image={topAdImage} />
+        <TopAdBanner />
         {mainContent}
         {adFooter}
       </div>
@@ -273,7 +308,7 @@ export default function AppLayout({
       </Sidebar>
       <SidebarInset className="flex flex-col">
        {header}
-       <AdBanner image={topAdImage} />
+       <TopAdBanner />
         {mainContent}
         {adFooter}
       </SidebarInset>
