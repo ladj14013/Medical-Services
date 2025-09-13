@@ -6,7 +6,9 @@ import {
   Bell,
   Home,
   LayoutGrid,
+  LogIn,
   Search,
+  UserPlus,
   User as UserIcon,
 } from 'lucide-react';
 
@@ -42,6 +44,7 @@ import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -49,21 +52,15 @@ const userAvatar = data.placeholderImages.find(
 
 export default function AppLayout({
   children,
-  hideSidebar = false,
 }: {
   children: React.ReactNode;
-  hideSidebar?: boolean;
 }) {
   const pathname = usePathname();
+  // In a real app, this would be based on a proper auth session
+  const [isAuthenticated, setIsAuthenticated] = useState(false); 
 
-  const menuItems = [
-    { href: '/', label: 'البحث عن طبيب', icon: Search },
-    // The user doesn't want to see these when not logged in.
-    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
-    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
-  ];
-
-  const isAuthenticated = true; // This can be replaced with actual auth state logic
+  const isHomePage = pathname === '/';
+  const hideSidebar = isHomePage && !isAuthenticated;
 
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -159,13 +156,13 @@ export default function AppLayout({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsAuthenticated(false)}>تسجيل الخروج</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
              <div className="flex items-center gap-2">
-               <Button variant="outline">تسجيل الدخول</Button>
+               <Button variant="outline" onClick={() => setIsAuthenticated(true)}>تسجيل الدخول</Button>
                <Button>إنشاء حساب</Button>
              </div>
           )}
@@ -190,6 +187,8 @@ export default function AppLayout({
 
   const unauthenticatedMenu = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
+    { href: '#', label: 'تسجيل الدخول', icon: LogIn, action: () => setIsAuthenticated(true) },
+    { href: '#', label: 'إنشاء حساب', icon: UserPlus, action: () => {} },
   ]
 
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
@@ -205,32 +204,26 @@ export default function AppLayout({
           <SidebarMenu>
             {currentMenuItems.map((item) => (
               <SidebarMenuItem key={item.label}>
-                <Link href={item.href} passHref legacyBehavior>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={item.label}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
+                <SidebarMenuButton
+                  asChild={!!item.href && item.href !== '#'}
+                  isActive={pathname === item.href}
+                  tooltip={item.label}
+                  onClick={item.action}
+                >
+                  {item.href && item.href !== '#' ? (
+                     <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  ) : (
+                    <>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </>
+                  )}
+                </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-             {!isAuthenticated && (
-              <>
-                <SidebarMenuItem>
-                    <SidebarMenuButton>
-                        <UserIcon />
-                        <span>تسجيل الدخول</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton>
-                        <span>إنشاء حساب</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-              </>
-            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
