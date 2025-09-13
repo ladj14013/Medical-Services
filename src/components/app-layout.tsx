@@ -51,9 +51,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
-    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
-    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+    // The user doesn't want to see these when not logged in.
+    // { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
+    // { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
+
+  const isAuthenticated = false; // This can be replaced with actual auth state logic
 
   return (
     <SidebarProvider>
@@ -76,6 +79,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuItem>
             ))}
+             {!isAuthenticated && (
+              <>
+                <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        <UserIcon />
+                        <span>تسجيل الدخول</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        <span>إنشاء حساب</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
@@ -91,92 +109,101 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Bell />
-                  <span className="sr-only">الإشعارات</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">الإشعارات</h4>
-                    <p className="text-sm text-muted-foreground">
-                      لديك رسالتان جديدتان.
-                    </p>
-                  </div>
-                  <div className="grid gap-2">
-                    <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
-                      <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                      <div className="grid gap-1">
-                        <p className="text-sm font-medium">
-                          تذكير بالموعد
-                        </p>
+            {isAuthenticated ? (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Bell />
+                      <span className="sr-only">الإشعارات</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80">
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none">الإشعارات</h4>
                         <p className="text-sm text-muted-foreground">
-                          موعدك مع د. ريد غدًا.
+                          لديك رسالتان جديدتان.
                         </p>
                       </div>
-                    </div>
-                     <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
-                      <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                      <div className="grid gap-1">
-                        <p className="text-sm font-medium">
-                          رسالة جديدة
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          أرسل لك د. شارما رسالة.
-                        </p>
+                      <div className="grid gap-2">
+                        <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                          <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
+                          <div className="grid gap-1">
+                            <p className="text-sm font-medium">
+                              تذكير بالموعد
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              موعدك مع د. ريد غدًا.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                          <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
+                          <div className="grid gap-1">
+                            <p className="text-sm font-medium">
+                              رسالة جديدة
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              أرسل لك د. شارما رسالة.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+                  </PopoverContent>
+                </Popover>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-9 w-9">
-                    {userAvatar && (
-                      <AvatarImage
-                        src={userAvatar.imageUrl}
-                        alt={userAvatar.description}
-                        width={40}
-                        height={40}
-                        data-ai-hint={userAvatar.imageHint}
-                      />
-                    )}
-                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {currentUser.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/profile" className="w-full">
-                    ملفي الشخصي
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/dashboard" className="w-full">
-                    المواعيد
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        {userAvatar && (
+                          <AvatarImage
+                            src={userAvatar.imageUrl}
+                            alt={userAvatar.description}
+                            width={40}
+                            height={40}
+                            data-ai-hint={userAvatar.imageHint}
+                          />
+                        )}
+                        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {currentUser.name}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {currentUser.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="w-full">
+                        ملفي الشخصي
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/dashboard" className="w-full">
+                        المواعيد
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+               <div className="flex items-center gap-2">
+                 <Button variant="outline">تسجيل الدخول</Button>
+                 <Button>إنشاء حساب</Button>
+               </div>
+            )}
           </div>
         </header>
         {children}
