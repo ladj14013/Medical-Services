@@ -100,10 +100,10 @@ function TopAdBanner() {
         variant="ghost"
         size="icon"
         className={cn(
-          'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10 transition-all',
-          isExpanded ? 'bottom-2' : 'top-1/2 -translate-y-1/2'
+          'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10',
+          isExpanded ? 'bottom-2' : '-top-4'
         )}
-        style={{ top: isExpanded ? undefined : 'calc(50% - 1rem)' }}
+        style={{ top: isExpanded ? undefined : '-1rem' }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -113,8 +113,7 @@ function TopAdBanner() {
   );
 }
 
-
-export default function AppLayout({
+function AppLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -128,8 +127,7 @@ export default function AppLayout({
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
         <div className="flex items-center gap-4">
-          {(isHomePage && isAuthenticated) && <SidebarTrigger className="md:hidden" />}
-          {(!isHomePage) && <SidebarTrigger className="md:hidden" />}
+          <SidebarTrigger className="md:hidden" />
           <div className={cn(isHomePage && !isAuthenticated ? '' : 'hidden md:block')}>
             <Logo />
           </div>
@@ -242,18 +240,19 @@ export default function AppLayout({
 
   const adFooter = <AdBanner image={bottomAdImage} className="mt-auto" />;
 
+  const homePageUnauthenticated = (
+    <div className="flex min-h-screen w-full flex-col">
+      {header}
+      <TopAdBanner />
+      {mainContent}
+      {adFooter}
+    </div>
+  );
 
   if (isHomePage && !isAuthenticated) {
-    return (
-      <div className="flex min-h-screen w-full flex-col">
-        {header}
-        <TopAdBanner />
-        {mainContent}
-        {adFooter}
-      </div>
-    );
+    return homePageUnauthenticated;
   }
-
+  
   const authenticatedMenu = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
     { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
@@ -264,14 +263,14 @@ export default function AppLayout({
     { href: '/', label: 'البحث عن طبيب', icon: Search },
     { href: '#', label: 'تسجيل الدخول', icon: LogIn, action: () => setIsAuthenticated(true) },
     { href: '#', label: 'إنشاء حساب', icon: UserPlus, action: () => {} },
-  ]
+  ];
 
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
-
-
+  const sidebarCollapsible = (isHomePage && !isAuthenticated) ? 'none' : (isHomePage ? 'none' : 'icon');
+  
   return (
-    <SidebarProvider>
-      <Sidebar side="right" collapsible={isHomePage ? 'offcanvas' : 'icon'}>
+    <>
+      <Sidebar side="right" collapsible={sidebarCollapsible}>
         <SidebarHeader>
           <Logo />
         </SidebarHeader>
@@ -311,6 +310,19 @@ export default function AppLayout({
         {mainContent}
         {adFooter}
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
+}
+
+
+export default function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SidebarProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </SidebarProvider>
+  )
 }
