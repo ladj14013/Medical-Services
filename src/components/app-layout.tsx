@@ -99,7 +99,10 @@ function TopAdBanner() {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-2 left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
+        className={cn(
+          'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10 transition-transform',
+          isExpanded ? 'bottom-2' : '-top-10'
+        )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -124,8 +127,8 @@ export default function AppLayout({
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
         <div className="flex items-center gap-4">
-          {(isHomePage && isAuthenticated) && <SidebarTrigger className="md:hidden" />}
-          <div className={cn((isHomePage && !isAuthenticated) ? '' : 'hidden md:block')}>
+          {(!isHomePage || isAuthenticated) && <SidebarTrigger className="md:hidden" />}
+          <div className={cn(isHomePage && !isAuthenticated ? '' : 'hidden md:block')}>
             <Logo />
           </div>
         </div>
