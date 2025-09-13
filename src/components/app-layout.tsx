@@ -101,9 +101,9 @@ function TopAdBanner() {
         size="icon"
         className={cn(
           'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10',
-          isExpanded ? 'bottom-2' : '-top-4'
+          isExpanded ? 'bottom-2' : 'bottom-auto'
         )}
-        style={{ top: isExpanded ? undefined : '-1rem' }}
+        style={{ top: isExpanded ? undefined : '0rem' }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
