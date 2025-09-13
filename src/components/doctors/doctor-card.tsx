@@ -24,7 +24,7 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
     (img) => img.id === doctor.imageId
   );
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-16 w-16">
           {doctorImage && (
