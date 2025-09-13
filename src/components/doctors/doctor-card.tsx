@@ -53,7 +53,7 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+        <Button asChild className="w-full">
           <Link href={`/doctors/${doctor.id}`}>حجز موعد</Link>
         </Button>
       </CardFooter>
