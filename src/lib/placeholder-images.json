@@ -41,6 +41,18 @@
       "description": "Current user's avatar",
       "imageUrl": "https://picsum.photos/seed/user1/40/40",
       "imageHint": "person"
+    },
+    {
+        "id": "ad-banner-top",
+        "description": "Top advertisement banner",
+        "imageUrl": "https://picsum.photos/seed/ad1/1200/200",
+        "imageHint": "advertisement banner"
+    },
+    {
+        "id": "ad-banner-bottom",
+        "description": "Bottom advertisement banner",
+        "imageUrl": "https://picsum.photos/seed/ad2/1200/200",
+        "imageHint": "advertisement banner"
     }
   ]
 }

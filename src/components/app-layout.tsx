@@ -11,6 +11,7 @@ import {
   UserPlus,
   User as UserIcon,
 } from 'lucide-react';
+import Image from 'next/image';
 
 import {
   SidebarProvider,
@@ -50,10 +51,31 @@ const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
 );
 
-function AdBanner({ text, className }: { text: string, className?: string }) {
+const topAdImage = data.placeholderImages.find(
+    (img) => img.id === 'ad-banner-top'
+);
+
+const bottomAdImage = data.placeholderImages.find(
+    (img) => img.id === 'ad-banner-bottom'
+);
+
+
+function AdBanner({ image, className }: { image?: { imageUrl: string, description: string, imageHint: string }, className?: string }) {
     return (
-        <div className={cn("bg-muted text-muted-foreground text-center p-4", className)}>
-            <p>{text}</p>
+        <div className={cn("bg-muted text-muted-foreground text-center relative h-48", className)}>
+            {image ? (
+                <Image 
+                    src={image.imageUrl}
+                    alt={image.description}
+                    data-ai-hint={image.imageHint}
+                    fill
+                    className='object-cover'
+                />
+            ) : (
+                 <div className="flex items-center justify-center h-full">
+                    <p>منطقة الإعلان</p>
+                </div>
+            )}
         </div>
     )
 }
@@ -184,14 +206,14 @@ export default function AppLayout({
     </main>
   );
 
-  const adFooter = <AdBanner text="منطقة الإعلان السفلى" className="mt-auto" />;
+  const adFooter = <AdBanner image={bottomAdImage} className="mt-auto" />;
 
 
   if (hideSidebar) {
     return (
       <div className="flex min-h-screen w-full flex-col">
         {header}
-        <AdBanner text="منطقة الإعلان العلوى" />
+        <AdBanner image={topAdImage} />
         {mainContent}
         {adFooter}
       </div>
@@ -251,7 +273,7 @@ export default function AppLayout({
       </Sidebar>
       <SidebarInset className="flex flex-col">
        {header}
-       <AdBanner text="منطقة الإعلان العلوى" />
+       <AdBanner image={topAdImage} />
         {mainContent}
         {adFooter}
       </SidebarInset>
