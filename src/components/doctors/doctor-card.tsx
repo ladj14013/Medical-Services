@@ -52,9 +52,13 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
             <span className="text-sm text-muted-foreground">{doctor.location}</span>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="gap-2">
         <Button asChild className="w-full" variant="accent">
           <Link href={`/doctors/${doctor.id}`}>حجز موعد</Link>
+        </Button>
+        <Button variant="outline" size="icon">
+          <MapPin className="h-4 w-4" />
+          <span className="sr-only">عرض الخريطة</span>
         </Button>
       </CardFooter>
     </Card>
