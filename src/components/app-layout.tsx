@@ -87,23 +87,24 @@ function TopAdBanner() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="relative bg-muted overflow-hidden">
-        <motion.div
-            animate={{ height: isExpanded ? '12rem' : '0rem', opacity: isExpanded ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-            className="overflow-hidden"
-        >
-            <AdBanner image={topAdImage} />
-        </motion.div>
-        <Button
-            variant="ghost"
-            size="icon"
-            className="absolute bottom-2 right-1/2 transform translate-x-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
-            onClick={() => setIsExpanded(!isExpanded)}
-        >
-            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-            <span className="sr-only">{isExpanded ? 'إخفاء الإعلان' : 'إظهار الإعلان'}</span>
-        </Button>
+    <div className="relative bg-muted">
+      <motion.div
+        initial={false}
+        animate={{ height: isExpanded ? '12rem' : '0rem' }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        className="overflow-hidden"
+      >
+        <AdBanner image={topAdImage} />
+      </motion.div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute bottom-2 right-1/2 transform translate-x-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+        <span className="sr-only">{isExpanded ? 'إخفاء الإعلان' : 'إظهار الإعلان'}</span>
+      </Button>
     </div>
   );
 }
@@ -116,16 +117,15 @@ export default function AppLayout({
 }) {
   const pathname = usePathname();
   // In a real app, this would be based on a proper auth session
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const isHomePage = pathname === '/';
-  const hideSidebar = isHomePage && !isAuthenticated;
-
+  
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
         <div className="flex items-center gap-4">
-          {!hideSidebar && <SidebarTrigger className="md:hidden" />}
-          <div className={cn(hideSidebar ? '' : 'hidden md:block')}>
+          {(!isHomePage || isAuthenticated) && <SidebarTrigger className="md:hidden" />}
+          <div className={cn((isHomePage && !isAuthenticated) ? '' : 'hidden md:block')}>
             <Logo />
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function AppLayout({
                           </p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                      <div className="grid grid-cols-25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
                         <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
                         <div className="grid gap-1">
                           <p className="text-sm font-medium">
