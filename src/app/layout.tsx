@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'الخدمات الطبية',
+  title: 'Medical Services',
   description: 'ابحث واحجز موعدك التالي مع الطبيب.',
 };
 
