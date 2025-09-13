@@ -101,7 +101,7 @@ function TopAdBanner() {
         size="icon"
         className={cn(
           'absolute left-4 bg-black/50 hover:bg-black/75 text-white rounded-full h-8 w-8 z-10 transition-all',
-           isExpanded ? 'bottom-2' : 'bottom-[-3.5rem]'
+           isExpanded ? 'bottom-2' : '-bottom-4'
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -224,7 +224,7 @@ function AppLayoutContent({
           ) : (
              <div className="flex items-center gap-2">
                <Button variant="outline" onClick={() => setIsAuthenticated(true)}>تسجيل الدخول</Button>
-               <Button variant="outline">إنشاء حساب</Button>
+               <Button>إنشاء حساب</Button>
              </div>
           )}
         </div>
