@@ -43,12 +43,12 @@ export default function DoctorDashboardPage() {
               مرحباً بعودتك، {doctor.name}
             </h1>
              <p className="text-muted-foreground">
-                إليك ملخص يومك.
+                ({doctor.specialization}) - إليك ملخص يومك.
             </p>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">مواعيد اليوم</CardTitle>
@@ -67,28 +67,6 @@ export default function DoctorDashboardPage() {
                 <CardContent>
                     <div className="text-2xl font-bold">{upcomingAppointments.length}</div>
                     <p className="text-xs text-muted-foreground">في الأيام القادمة.</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">التخصص</CardTitle>
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{doctor.specialization}</div>
-                     <p className="text-xs text-muted-foreground invisible">Placeholder</p>
-                </CardContent>
-            </Card>
-            <Card className="bg-accent/20 border-accent/50 hover:bg-accent/30 transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">منتدى الأطباء</CardTitle>
-                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">مناقشات</div>
-                    <Link href="/forum" className='text-xs text-muted-foreground flex items-center gap-1 group'>
-                        اذهب إلى المنتدى <ArrowRight className='h-3 w-3 transform transition-transform group-hover:translate-x-1'/>
-                    </Link>
                 </CardContent>
             </Card>
         </div>
