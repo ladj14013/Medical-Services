@@ -8,6 +8,8 @@ export interface Doctor {
   };
   bio: string;
   imageId: string;
+  status: 'approved' | 'pending' | 'rejected';
+  licenseNumber?: string;
 }
 
 export interface Appointment {

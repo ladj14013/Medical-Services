@@ -36,6 +36,18 @@
       "imageUrl": "https://picsum.photos/seed/doc6/200/200",
       "imageHint": "doctor portrait"
     },
+     {
+      "id": "doctor-7",
+      "description": "Portrait of Dr. Laila Hassan",
+      "imageUrl": "https://picsum.photos/seed/doc7/200/200",
+      "imageHint": "doctor portrait"
+    },
+    {
+      "id": "doctor-8",
+      "description": "Portrait of Dr. Omar Farooq",
+      "imageUrl": "https://picsum.photos/seed/doc8/200/200",
+      "imageHint": "doctor portrait"
+    },
     {
       "id": "user-avatar",
       "description": "Current user's avatar",

@@ -12,6 +12,7 @@ export const doctors: Doctor[] = [
     },
     bio: 'د. ريد طبيبة قلب معتمدة من البورد ولديها أكثر من 15 عامًا من الخبرة في علاج أمراض القلب. وهي زميلة في الكلية الأمريكية لأمراض القلب.',
     imageId: 'doctor-1',
+    status: 'approved',
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ export const doctors: Doctor[] = [
     },
     bio: 'يتخصص د. ثورن في الأمراض الجلدية الطبية والتجميلية. وهو معروف بنهجه الذي يركز على المريض وخبرته في علاج الاضطرابات الجلدية النادرة.',
     imageId: 'doctor-2',
+    status: 'approved',
   },
   {
     id: '3',
@@ -36,6 +38,7 @@ export const doctors: Doctor[] = [
     },
     bio: 'بسلوكها الدافئ والودي، تعتني الدكتورة شارما بالأطفال منذ أكثر من عقد. تؤمن بالرعاية الشاملة لمرضاها الصغار.',
     imageId: 'doctor-3',
+    status: 'approved',
   },
   {
     id: '4',
@@ -48,6 +51,7 @@ export const doctors: Doctor[] = [
     },
     bio: 'الدكتور تشين هو طبيب أعصاب رائد يركز على اضطرابات الحركة والأمراض التنكسية العصبية. يشارك بنشاط في الأبحاث السريرية.',
     imageId: 'doctor-4',
+    status: 'approved',
   },
     {
     id: '5',
@@ -60,6 +64,7 @@ export const doctors: Doctor[] = [
     },
     bio: 'تقدم الدكتورة روسي نهجًا رحيمًا في رعاية القلب، وهي متخصصة في الطب الوقائي وصحة القلب للمرأة.',
     imageId: 'doctor-5',
+    status: 'approved',
   },
   {
     id: '6',
@@ -72,6 +77,29 @@ export const doctors: Doctor[] = [
     },
     bio: 'الدكتور كارتر طبيب أمراض جلدية مشهور يركز على جراحة الجلد المتقدمة وعلاج سرطان الجلد.',
     imageId: 'doctor-6',
+    status: 'approved',
+  },
+   {
+    id: '7',
+    name: 'د. ليلى حسن',
+    specialization: 'طب النساء والتوليد',
+    location: 'سيتي سنتر، تكساس',
+    availability: {},
+    bio: 'طبيبة نساء وتوليد ذات خبرة تنتظر الموافقة للانضمام إلى منصتنا.',
+    imageId: 'doctor-7',
+    status: 'pending',
+    licenseNumber: 'MD-789123'
+  },
+  {
+    id: '8',
+    name: 'د. عمر فاروق',
+    specialization: 'جراحة العظام',
+    location: 'ريفرسايد، واشنطن',
+    availability: {},
+    bio: 'جراح عظام متخصص في الإصابات الرياضية في انتظار المراجعة.',
+    imageId: 'doctor-8',
+    status: 'pending',
+    licenseNumber: 'MD-456789'
   }
 ];
 
