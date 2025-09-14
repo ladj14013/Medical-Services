@@ -9,6 +9,7 @@ export const doctors: Doctor[] = [
     availability: {
       [new Date(Date.now() + 86400000).toISOString().split('T')[0]]: ['09:00 ص', '10:00 ص', '02:00 م'],
       [new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0]]: ['09:30 ص', '11:00 ص', '03:00 م', '04:00 م'],
+      [new Date().toISOString().split('T')[0]]: ['09:00 ص', '10:00 ص', '11:00 ص'],
     },
     bio: 'د. ريد طبيبة قلب معتمدة من البورد ولديها أكثر من 15 عامًا من الخبرة في علاج أمراض القلب. وهي زميلة في الكلية الأمريكية لأمراض القلب.',
     imageId: 'doctor-1',
@@ -105,6 +106,16 @@ export const doctors: Doctor[] = [
 
 export const appointments: Appointment[] = [
   {
+    id: 'apt0',
+    doctorId: '1',
+    doctorName: 'د. إيفلين ريد',
+    doctorSpecialization: 'طب القلب',
+    date: new Date().toISOString().split('T')[0],
+    time: '09:00 ص',
+    status: 'upcoming',
+    reason: 'فحص روتيني',
+  },
+  {
     id: 'apt1',
     doctorId: '1',
     doctorName: 'د. إيفلين ريد',
@@ -112,6 +123,7 @@ export const appointments: Appointment[] = [
     date: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
     time: '10:00 ص',
     status: 'upcoming',
+    reason: 'استشارة متابعة',
   },
   {
     id: 'apt2',
@@ -121,6 +133,7 @@ export const appointments: Appointment[] = [
     date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
     time: '11:30 ص',
     status: 'upcoming',
+    reason: 'تطعيمات',
   },
 ];
 

@@ -20,6 +20,7 @@ export interface Appointment {
   date: string;
   time: string;
   status: 'upcoming' | 'completed' | 'cancelled';
+  reason?: string;
 }
 
 export interface User {

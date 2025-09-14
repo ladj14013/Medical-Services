@@ -39,7 +39,7 @@ export default function AppointmentView({ appointments: initialAppointments }: {
 
 
   return (
-     <Card>
+     <Card className='no-print'>
         <CardHeader>
             <CardTitle className='font-headline'>المواعيد القادمة</CardTitle>
             <CardDescription>هذه هي قائمة مرضاك القادمين.</CardDescription>
@@ -55,7 +55,7 @@ export default function AppointmentView({ appointments: initialAppointments }: {
                                 {currentUser.name} {/* In a real app, this would be the actual patient's name */}
                             </p>
                              <p className="text-sm text-muted-foreground mt-1">
-                                السبب: فحص روتيني {/* Placeholder */}
+                                السبب: {apt.reason || 'غير محدد'}
                             </p>
                         </div>
                         <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
