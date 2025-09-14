@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Doctor } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import DoctorCard from './doctor-card';
@@ -11,10 +11,11 @@ interface SearchDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   doctors: Doctor[];
+  initialSearch?: string;
 }
 
-export default function SearchDialog({ isOpen, setIsOpen, doctors }: SearchDialogProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function SearchDialog({ isOpen, setIsOpen, doctors, initialSearch }: SearchDialogProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
 
   const handleSearch = () => {
@@ -39,6 +40,34 @@ export default function SearchDialog({ isOpen, setIsOpen, doctors }: SearchDialo
       handleSearch();
     }
   };
+
+  useEffect(() => {
+    if (initialSearch) {
+      setSearchTerm(initialSearch);
+      const lowercasedSearchTerm = initialSearch.toLowerCase();
+      const results = doctors.filter((doctor) => 
+        doctor.specialization.toLowerCase().includes(lowercasedSearchTerm)
+      );
+      setFilteredDoctors(results);
+    } else {
+        setFilteredDoctors(doctors);
+    }
+  }, [initialSearch, doctors]);
+
+
+  useEffect(() => {
+    if (isOpen) {
+        if(initialSearch) {
+            setSearchTerm(initialSearch);
+            handleSearch();
+        } else {
+            // Reset search when dialog opens without an initial term
+            setSearchTerm('');
+            setFilteredDoctors(doctors);
+        }
+    }
+  }, [isOpen, initialSearch, doctors]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
