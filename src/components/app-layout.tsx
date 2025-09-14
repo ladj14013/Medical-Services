@@ -156,6 +156,7 @@ function AppLayoutContent({
 
   const isHomePage = pathname === '/';
   const isLoginPage = pathname === '/login';
+  const isRegisterPage = pathname === '/register';
   
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -265,7 +266,7 @@ function AppLayoutContent({
           ) : (
              isClient && <div className="flex items-center gap-2">
                <Button asChild variant="outline"><Link href="/login">تسجيل الدخول</Link></Button>
-               <Button>إنشاء حساب</Button>
+               <Button asChild><Link href="/register">إنشاء حساب</Link></Button>
              </div>
           )}
         </div>
@@ -295,7 +296,7 @@ function AppLayoutContent({
   const unauthenticatedMenu = [
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
     { id: 'login', href: '/login', label: 'تسجيل الدخول', icon: LogIn },
-    { id: 'register', href: '#', label: 'إنشاء حساب', icon: UserPlus },
+    { id: 'register', href: '/register', label: 'إنشاء حساب', icon: UserPlus },
   ];
 
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
@@ -311,8 +312,8 @@ function AppLayoutContent({
     </div>
   );
 
-  if (isLoginPage) {
-      return children; // Render only the login page content
+  if (isLoginPage || isRegisterPage) {
+      return children; // Render only the login/register page content
   }
 
   if (isClient && isHomePage && !isAuthenticated) {

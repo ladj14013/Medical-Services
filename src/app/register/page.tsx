@@ -16,19 +16,20 @@ import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd validate credentials here.
-    // For this prototype, we'll just simulate a successful login.
+    // In a real app, you'd create a user account here.
+    // For this prototype, we'll just simulate a successful registration.
     toast({
-      title: 'تم تسجيل الدخول بنجاح',
-      description: 'مرحباً بعودتك!',
+      title: 'تم إنشاء الحساب بنجاح',
+      description: 'مرحباً بك! سيتم توجيهك إلى لوحة التحكم.',
     });
     // This is where you would set the auth state.
     // For now, we redirect to the authenticated part of the app.
@@ -42,13 +43,24 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">تسجيل الدخول</CardTitle>
+          <CardTitle className="text-2xl font-headline">إنشاء حساب جديد</CardTitle>
           <CardDescription>
-            أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.
+            أدخل معلوماتك أدناه لإنشاء حساب.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">الاسم الكامل</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="اسمك الكامل"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
@@ -71,12 +83,12 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full">
-              تسجيل الدخول
+              إنشاء حساب
             </Button>
-             <div className="text-center">
+            <div className="text-center">
                 <Button variant="link" size="sm" asChild>
-                    <Link href="/register">
-                        ليس لديك حساب؟ إنشاء حساب جديد
+                    <Link href="/login">
+                        هل لديك حساب بالفعل؟ تسجيل الدخول
                     </Link>
                 </Button>
             </div>
