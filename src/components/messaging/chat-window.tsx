@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { messages as initialMessages } from '@/lib/data';
 import type { Doctor, Message as MessageType } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { format }s from 'date-fns';
+import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Send } from 'lucide-react';
 import data from '@/lib/placeholder-images.json';
