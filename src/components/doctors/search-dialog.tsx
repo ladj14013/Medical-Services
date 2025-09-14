@@ -6,21 +6,54 @@ import DoctorCard from './doctor-card';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Skeleton } from '../ui/skeleton';
 
 interface SearchDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  doctors: Doctor[];
   initialSearch?: string;
 }
 
-export default function SearchDialog({ isOpen, setIsOpen, doctors, initialSearch }: SearchDialogProps) {
+export default function SearchDialog({ isOpen, setIsOpen, initialSearch }: SearchDialogProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchDoctors = async () => {
+        setIsLoading(true);
+        try {
+          const res = await fetch('/api/doctors');
+          const data: Doctor[] = await res.json();
+          setAllDoctors(data);
+          // Apply initial search if it exists
+           if (initialSearch) {
+              setSearchTerm(initialSearch);
+              const lowercasedSearchTerm = initialSearch.toLowerCase();
+              const results = data.filter((doctor) => 
+                doctor.specialization.toLowerCase().includes(lowercasedSearchTerm)
+              );
+              setFilteredDoctors(results);
+          } else {
+              setFilteredDoctors(data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch doctors:", error);
+          setFilteredDoctors([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchDoctors();
+    }
+  }, [isOpen, initialSearch]);
+
 
   const handleSearch = () => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
-    const results = doctors.filter((doctor) => {
+    const results = allDoctors.filter((doctor) => {
       return (
         doctor.name.toLowerCase().includes(lowercasedSearchTerm) ||
         doctor.specialization.toLowerCase().includes(lowercasedSearchTerm) ||
@@ -32,7 +65,7 @@ export default function SearchDialog({ isOpen, setIsOpen, doctors, initialSearch
   
   const handleClear = () => {
     setSearchTerm('');
-    setFilteredDoctors(doctors);
+    setFilteredDoctors(allDoctors);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -41,33 +74,39 @@ export default function SearchDialog({ isOpen, setIsOpen, doctors, initialSearch
     }
   };
 
-  useEffect(() => {
-    if (initialSearch) {
-      setSearchTerm(initialSearch);
-      const lowercasedSearchTerm = initialSearch.toLowerCase();
-      const results = doctors.filter((doctor) => 
-        doctor.specialization.toLowerCase().includes(lowercasedSearchTerm)
-      );
-      setFilteredDoctors(results);
-    } else {
-        setFilteredDoctors(doctors);
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1">
+            {[...Array(3)].map((_, i) => (
+                 <div key={i} className="flex flex-col space-y-3">
+                    <Skeleton className="h-[200px] w-full rounded-xl" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-[250px]" />
+                        <Skeleton className="h-4 w-[200px]" />
+                    </div>
+                </div>
+            ))}
+        </div>
+      )
     }
-  }, [initialSearch, doctors]);
 
-
-  useEffect(() => {
-    if (isOpen) {
-        if(initialSearch) {
-            setSearchTerm(initialSearch);
-            handleSearch();
-        } else {
-            // Reset search when dialog opens without an initial term
-            setSearchTerm('');
-            setFilteredDoctors(doctors);
-        }
+    if (filteredDoctors.length > 0) {
+      return (
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1">
+            {filteredDoctors.map((doctor) => (
+                <DoctorCard key={doctor.id} doctor={doctor} />
+            ))}
+        </div>
+      )
     }
-  }, [isOpen, initialSearch, doctors]);
 
+    return (
+       <div className="md:col-span-3 text-center text-muted-foreground py-10">
+            لم يتم العثور على أطباء يطابقون معاييرك.
+        </div>
+    )
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -103,17 +142,7 @@ export default function SearchDialog({ isOpen, setIsOpen, doctors, initialSearch
           </div>
         </div>
         <ScrollArea className="flex-1 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1">
-                {filteredDoctors.length > 0 ? (
-                filteredDoctors.map((doctor) => (
-                    <DoctorCard key={doctor.id} doctor={doctor} />
-                ))
-                ) : (
-                <div className="md:col-span-3 text-center text-muted-foreground py-10">
-                    لم يتم العثور على أطباء يطابقون معاييرك.
-                </div>
-                )}
-            </div>
+           {renderContent()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

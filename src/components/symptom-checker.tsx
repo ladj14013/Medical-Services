@@ -15,7 +15,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Search, Wand2, Lightbulb, Plus, X, Trash2 } from 'lucide-react';
 import { symptomCheck } from '@/ai/flows/symptom-checker';
 import SearchDialog from './doctors/search-dialog';
-import { doctors } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 
 export default function SymptomChecker() {
@@ -168,7 +167,6 @@ export default function SymptomChecker() {
       <SearchDialog
         isOpen={isSearchDialogOpen}
         setIsOpen={setIsSearchDialogOpen}
-        doctors={doctors}
         initialSearch={initialSearchTerm}
       />
     </>

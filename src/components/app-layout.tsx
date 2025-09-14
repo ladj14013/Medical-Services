@@ -57,7 +57,6 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import SearchDialog from './doctors/search-dialog';
-import { doctors } from '@/lib/data';
 import RegisterAsDialog from './auth/register-as-dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -449,7 +448,6 @@ function AppLayoutContent({
             <SearchDialog 
                 isOpen={isSearchDialogOpen} 
                 setIsOpen={setIsSearchDialogOpen}
-                doctors={doctors}
             />
             <RegisterAsDialog
                 isOpen={isRegisterAsDialogOpen}
@@ -468,7 +466,6 @@ function AppLayoutContent({
         <SearchDialog 
             isOpen={isSearchDialogOpen} 
             setIsOpen={setIsSearchDialogOpen}
-            doctors={doctors}
         />
         <RegisterAsDialog
             isOpen={isRegisterAsDialogOpen}
