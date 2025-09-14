@@ -315,11 +315,32 @@ function AppLayoutContent({
   );
 
   if (isLoginPage || isRegisterPage) {
-      return children; // Render only the login/register page content
+      return (
+        <>
+            {children}
+            <RegisterAsDialog
+                isOpen={isRegisterAsDialogOpen}
+                setIsOpen={setIsRegisterAsDialogOpen}
+            />
+        </>
+      )
   }
 
   if (isClient && isHomePage && !isAuthenticated) {
-    return homePageUnauthenticated;
+     return (
+        <>
+            {homePageUnauthenticated}
+            <SearchDialog 
+                isOpen={isSearchDialogOpen} 
+                setIsOpen={setIsSearchDialogOpen}
+                doctors={doctors}
+            />
+            <RegisterAsDialog
+                isOpen={isRegisterAsDialogOpen}
+                setIsOpen={setIsRegisterAsDialogOpen}
+            />
+        </>
+    );
   }
   
   if (!isClient) {
@@ -394,5 +415,3 @@ export default function AppLayout({
     </SidebarProvider>
   )
 }
-
-    
