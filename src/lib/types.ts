@@ -29,3 +29,21 @@ export interface User {
   medicalHistory: string;
   avatarId: string;
 }
+
+export interface ForumPost {
+  id: string;
+  title: string;
+  authorId: string;
+  authorName: string;
+  authorSpecialization: string;
+  date: string;
+  content: string;
+  comments: ForumComment[];
+}
+
+export interface ForumComment {
+  id: string;
+  authorName: string;
+  date: string;
+  content: string;
+}

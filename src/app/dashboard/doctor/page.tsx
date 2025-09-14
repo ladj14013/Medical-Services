@@ -6,9 +6,11 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import data from '@/lib/placeholder-images.json';
-import { Briefcase, CalendarDays, Clock, Users } from 'lucide-react';
+import { Briefcase, CalendarDays, Clock, MessageSquare, Users, ArrowRight } from 'lucide-react';
 import AppointmentView from '@/components/dashboard/doctor/appointment-view';
 import { format } from 'date-fns';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function DoctorDashboardPage() {
   // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
@@ -46,7 +48,7 @@ export default function DoctorDashboardPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">مواعيد اليوم</CardTitle>
@@ -75,6 +77,18 @@ export default function DoctorDashboardPage() {
                 <CardContent>
                     <div className="text-2xl font-bold">{doctor.specialization}</div>
                      <p className="text-xs text-muted-foreground invisible">Placeholder</p>
+                </CardContent>
+            </Card>
+            <Card className="bg-accent/20 border-accent/50 hover:bg-accent/30 transition-colors">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">منتدى الأطباء</CardTitle>
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">مناقشات</div>
+                    <Link href="/forum" className='text-xs text-muted-foreground flex items-center gap-1 group'>
+                        اذهب إلى المنتدى <ArrowRight className='h-3 w-3 transform transition-transform group-hover:translate-x-1'/>
+                    </Link>
                 </CardContent>
             </Card>
         </div>
