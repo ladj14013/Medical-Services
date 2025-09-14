@@ -210,8 +210,9 @@ function AppLayoutContent({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" size="icon" className="rounded-full relative">
                     <Bell />
+                    <span className="absolute top-1 right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">2</span>
                     <span className="sr-only">الإشعارات</span>
                   </Button>
                 </PopoverTrigger>
