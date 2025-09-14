@@ -1,14 +1,42 @@
 'use client';
 
+import { useState } from 'react';
 import type { Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { currentUser } from '@/lib/data'; // Assuming we can get patient name from here
+import { currentUser } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
-export default function AppointmentView({ appointments }: { appointments: Appointment[] }) {
+
+export default function AppointmentView({ appointments: initialAppointments }: { appointments: Appointment[] }) {
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
+  const { toast } = useToast();
+
+  const handleCancel = (id: string) => {
+    setAppointments((prev) => prev.filter((apt) => apt.id !== id));
+    toast({
+      title: 'تم إلغاء الموعد',
+      description: 'تم إلغاء الموعد بنجاح. قد يتم إخطار المريض.',
+      variant: 'destructive'
+    });
+  };
+
+  const upcomingAppointments = appointments.filter(apt => apt.status === 'upcoming');
+
 
   return (
      <Card>
@@ -17,8 +45,8 @@ export default function AppointmentView({ appointments }: { appointments: Appoin
             <CardDescription>هذه هي قائمة مرضاك القادمين.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-             {appointments.length > 0 ? (
-                appointments.map((apt) => (
+             {upcomingAppointments.length > 0 ? (
+                upcomingAppointments.map((apt) => (
                 <Card key={apt.id} className="p-4">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                         <div className='flex-1'>
@@ -40,8 +68,30 @@ export default function AppointmentView({ appointments }: { appointments: Appoin
                                 <span>{apt.time}</span>
                             </div>
                         </div>
-                        <div className="flex gap-2 self-end sm:self-center">
-                            <Button variant="outline">عرض الملف الشخصي للمريض</Button>
+                        <div className="flex gap-2 self-end sm:self-center flex-wrap">
+                            <Button variant="outline" size="sm">عرض الملف الشخصي للمريض</Button>
+                             <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm">
+                                    <X className="h-4 w-4 ml-1"/>
+                                    إلغاء
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    سيؤدي هذا الإجراء إلى إلغاء الموعد بشكل دائم. سيتم إرسال رسالة اعتذار للمريض.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>تراجع</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleCancel(apt.id)}>
+                                    تأكيد الإلغاء
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </div>
                 </Card>
