@@ -14,6 +14,7 @@ export const doctors: Doctor[] = [
     bio: 'د. ريد طبيبة قلب معتمدة من البورد ولديها أكثر من 15 عامًا من الخبرة في علاج أمراض القلب. وهي زميلة في الكلية الأمريكية لأمراض القلب.',
     imageId: 'doctor-1',
     status: 'approved',
+    dailyAppointmentLimit: 10,
   },
   {
     id: '2',
@@ -27,6 +28,7 @@ export const doctors: Doctor[] = [
     bio: 'يتخصص د. ثورن في الأمراض الجلدية الطبية والتجميلية. وهو معروف بنهجه الذي يركز على المريض وخبرته في علاج الاضطرابات الجلدية النادرة.',
     imageId: 'doctor-2',
     status: 'approved',
+    dailyAppointmentLimit: 8,
   },
   {
     id: '3',
@@ -40,6 +42,7 @@ export const doctors: Doctor[] = [
     bio: 'بسلوكها الدافئ والودي، تعتني الدكتورة شارما بالأطفال منذ أكثر من عقد. تؤمن بالرعاية الشاملة لمرضاها الصغار.',
     imageId: 'doctor-3',
     status: 'approved',
+    dailyAppointmentLimit: 12,
   },
   {
     id: '4',
@@ -53,6 +56,7 @@ export const doctors: Doctor[] = [
     bio: 'الدكتور تشين هو طبيب أعصاب رائد يركز على اضطرابات الحركة والأمراض التنكسية العصبية. يشارك بنشاط في الأبحاث السريرية.',
     imageId: 'doctor-4',
     status: 'approved',
+    dailyAppointmentLimit: 5,
   },
     {
     id: '5',
@@ -66,6 +70,7 @@ export const doctors: Doctor[] = [
     bio: 'تقدم الدكتورة روسي نهجًا رحيمًا في رعاية القلب، وهي متخصصة في الطب الوقائي وصحة القلب للمرأة.',
     imageId: 'doctor-5',
     status: 'approved',
+    dailyAppointmentLimit: 10,
   },
   {
     id: '6',
@@ -79,6 +84,7 @@ export const doctors: Doctor[] = [
     bio: 'الدكتور كارتر طبيب أمراض جلدية مشهور يركز على جراحة الجلد المتقدمة وعلاج سرطان الجلد.',
     imageId: 'doctor-6',
     status: 'approved',
+    dailyAppointmentLimit: 9,
   },
    {
     id: '7',

@@ -14,6 +14,7 @@ import {
   LogOut,
   MessageSquare,
   Home,
+  Settings,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -142,7 +143,7 @@ function AppLayoutContent({
 
     // This is a prototype-specific hack to set role based on URL
     if (authStatus === 'true') {
-        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum')) {
+        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum') || pathname.startsWith('/profile/doctor-settings')) {
             setUserRole('doctor');
             sessionStorage.setItem('userRole', 'doctor');
         } else if (pathname.startsWith('/dashboard/patient') || pathname.startsWith('/profile')) {
@@ -282,7 +283,7 @@ function AppLayoutContent({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link href="/profile" className="w-full">
+                    <Link href={userRole === 'doctor' ? "/profile/doctor-settings" : "/profile"} className="w-full">
                       ملفي الشخصي
                     </Link>
                   </DropdownMenuItem>
@@ -338,7 +339,7 @@ function AppLayoutContent({
   const doctorMenu = [
     { id: 'dashboard', href: '/dashboard/doctor', label: 'لوحة التحكم', icon: LayoutGrid },
     { id: 'forum', href: '/forum', label: 'المنتدى', icon: MessageSquare },
-    { id: 'profile', href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+    { id: 'settings', href: '/profile/doctor-settings', label: 'ملفي الشخصي', icon: Settings },
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
   ];
 

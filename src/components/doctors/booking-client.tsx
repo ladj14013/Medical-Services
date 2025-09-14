@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { addDays, format, isBefore } from 'date-fns';
+import { addDays, format, isBefore, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,20 @@ export default function BookingClient({ doctor }: BookingClientProps) {
     }
   };
 
+  const isDayDisabled = (day: Date): boolean => {
+    if (isBefore(day, new Date()) && !isSameDay(day, new Date())) {
+      return true;
+    }
+    if (doctor.dailyAppointmentLimit) {
+      const dayFormatted = format(day, 'yyyy-MM-dd');
+      const bookedCount = doctor.availability[dayFormatted]?.length || 0;
+      if (bookedCount >= doctor.dailyAppointmentLimit) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <>
       <Card>
@@ -98,7 +112,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
                       setSelectedTime('');
                     }}
                     initialFocus
-                    disabled={(day) => isBefore(day, new Date())}
+                    disabled={isDayDisabled}
                     locale={ar}
                   />
                 </PopoverContent>
@@ -136,7 +150,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
               ) : (
                 <div className="flex items-center justify-center h-full p-4 border rounded-md bg-muted/50">
                   <p className="text-muted-foreground">
-                    لا توجد أوقات متاحة في هذا التاريخ.
+                    {date && isDayDisabled(date) ? 'اليوم ممتلئ. الرجاء اختيار يوم آخر.' : 'لا توجد أوقات متاحة في هذا التاريخ.'}
                   </p>
                 </div>
               )}

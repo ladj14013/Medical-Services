@@ -10,6 +10,7 @@ export interface Doctor {
   imageId: string;
   status: 'approved' | 'pending' | 'rejected';
   licenseNumber?: string;
+  dailyAppointmentLimit?: number;
 }
 
 export interface Appointment {
