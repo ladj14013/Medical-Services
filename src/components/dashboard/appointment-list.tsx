@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import Link from 'next/link';
 
 export default function AppointmentList() {
   const [appointments, setAppointments] =
@@ -64,7 +65,9 @@ export default function AppointmentList() {
                   </div>
                 </div>
                 <div className="flex gap-2 self-end sm:self-center">
-                  <Button variant="outline">إعادة الجدولة</Button>
+                  <Button variant="outline" asChild>
+                    <Link href={`/doctors/${apt.doctorId}`}>إعادة الجدولة</Link>
+                  </Button>
                   <Button
                     variant="destructive"
                     onClick={() => handleCancel(apt.id)}
