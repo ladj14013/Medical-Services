@@ -75,7 +75,7 @@ export default function LoginPage() {
             </Button>
              <div className="text-center">
                 <Button variant="link" size="sm" asChild>
-                    <Link href="/register">
+                    <Link href="/register/patient">
                         ليس لديك حساب؟ إنشاء حساب جديد
                     </Link>
                 </Button>

@@ -51,6 +51,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import SearchDialog from './doctors/search-dialog';
 import { doctors } from '@/lib/data';
+import RegisterAsDialog from './auth/register-as-dialog';
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -124,6 +125,7 @@ function AppLayoutContent({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const [isRegisterAsDialogOpen, setIsRegisterAsDialogOpen] = useState(false);
 
 
   useEffect(() => {
@@ -155,8 +157,8 @@ function AppLayoutContent({
   };
 
   const isHomePage = pathname === '/';
-  const isLoginPage = pathname === '/login';
-  const isRegisterPage = pathname === '/register';
+  const isLoginPage = pathname.startsWith('/login');
+  const isRegisterPage = pathname.startsWith('/register');
   
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -266,7 +268,7 @@ function AppLayoutContent({
           ) : (
              isClient && <div className="flex items-center gap-2">
                <Button asChild variant="outline"><Link href="/login">تسجيل الدخول</Link></Button>
-               <Button asChild><Link href="/register">إنشاء حساب</Link></Button>
+               <Button onClick={() => setIsRegisterAsDialogOpen(true)}>إنشاء حساب</Button>
              </div>
           )}
         </div>
@@ -296,7 +298,7 @@ function AppLayoutContent({
   const unauthenticatedMenu = [
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
     { id: 'login', href: '/login', label: 'تسجيل الدخول', icon: LogIn },
-    { id: 'register', href: '/register', label: 'إنشاء حساب', icon: UserPlus },
+    { id: 'register', label: 'إنشاء حساب', icon: UserPlus, action: () => setIsRegisterAsDialogOpen(true) },
   ];
 
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
@@ -330,6 +332,10 @@ function AppLayoutContent({
             isOpen={isSearchDialogOpen} 
             setIsOpen={setIsSearchDialogOpen}
             doctors={doctors}
+        />
+        <RegisterAsDialog
+            isOpen={isRegisterAsDialogOpen}
+            setIsOpen={setIsRegisterAsDialogOpen}
         />
         <Sidebar side="right" collapsible={sidebarCollapsible}>
           <SidebarHeader>

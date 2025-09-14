@@ -16,24 +16,24 @@ import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
 
-export default function RegisterPage() {
+export default function RegisterDoctorPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [specialization, setSpecialization] = useState('');
+  const [license, setLicense] = useState('');
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd create a user account here.
-    // For this prototype, we'll just simulate a successful registration.
+    // In a real app, you'd create a doctor account here.
     toast({
-      title: 'تم إنشاء الحساب بنجاح',
-      description: 'مرحباً بك! سيتم توجيهك إلى لوحة التحكم.',
+      title: 'تم استلام طلب التسجيل',
+      description: 'سيتم مراجعة طلبك. سيتم إعلامك عند الموافقة عليه.',
     });
-    // This is where you would set the auth state.
-    // For now, we redirect to the authenticated part of the app.
-    router.push('/dashboard/patient');
+    // For now, we redirect to the home page.
+    router.push('/');
   };
 
   return (
@@ -41,15 +41,15 @@ export default function RegisterPage() {
        <div className="mb-8">
         <Logo />
       </div>
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">إنشاء حساب مريض</CardTitle>
+          <CardTitle className="text-2xl font-headline">إنشاء حساب طبيب</CardTitle>
           <CardDescription>
-            أدخل معلوماتك أدناه لإنشاء حساب.
+            أدخل معلوماتك أدناه للانضمام إلى شبكتنا من الأطباء.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-6">
+          <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">الاسم الكامل</Label>
               <Input
@@ -59,6 +59,28 @@ export default function RegisterPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="specialization">التخصص</Label>
+              <Input
+                id="specialization"
+                type="text"
+                placeholder="مثال: طب القلب"
+                required
+                value={specialization}
+                onChange={(e) => setSpecialization(e.target.value)}
+              />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="license">رقم رخصة مزاولة المهنة</Label>
+              <Input
+                id="license"
+                type="text"
+                placeholder="رقم الرخصة"
+                required
+                value={license}
+                onChange={(e) => setLicense(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -83,7 +105,7 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full">
-              إنشاء حساب
+              إرسال طلب التسجيل
             </Button>
             <div className="text-center">
                 <Button variant="link" size="sm" asChild>
