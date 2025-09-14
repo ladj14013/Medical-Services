@@ -56,9 +56,11 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
         <Button asChild className="w-full" variant="accent">
           <Link href={`/doctors/${doctor.id}`}>حجز موعد</Link>
         </Button>
-        <Button variant="outline" size="icon">
-          <MapPin className="h-4 w-4" />
-          <span className="sr-only">عرض الخريطة</span>
+        <Button variant="outline" size="icon" asChild>
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(doctor.location)}`} target="_blank" rel="noopener noreferrer">
+                <MapPin className="h-4 w-4" />
+                <span className="sr-only">عرض الخريطة</span>
+            </a>
         </Button>
       </CardFooter>
     </Card>
