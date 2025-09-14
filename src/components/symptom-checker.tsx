@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Search, Wand2, Lightbulb, Plus, X } from 'lucide-react';
+import { Loader2, Search, Wand2, Lightbulb, Plus, X, Trash2 } from 'lucide-react';
 import { symptomCheck } from '@/ai/flows/symptom-checker';
 import SearchDialog from './doctors/search-dialog';
 import { doctors } from '@/lib/data';
@@ -70,6 +70,12 @@ export default function SymptomChecker() {
     }
   }
 
+  const handleClear = () => {
+    setSymptomsList([]);
+    setCurrentSymptom('');
+    setResult(null);
+  }
+
   return (
     <>
       <Card className="w-full max-w-2xl text-center">
@@ -96,6 +102,12 @@ export default function SymptomChecker() {
                 <Plus className="h-5 w-5" />
                 <span className="hidden sm:inline sm:mr-2">إضافة عرض</span>
               </Button>
+               {symptomsList.length > 0 && (
+                <Button variant="ghost" size="icon" onClick={handleClear}>
+                    <Trash2 className="h-5 w-5" />
+                    <span className="sr-only">مسح</span>
+                </Button>
+               )}
             </div>
              {symptomsList.length > 0 && (
                 <div className="p-4 border rounded-lg bg-muted/50 flex flex-wrap gap-2">
