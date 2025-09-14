@@ -10,26 +10,47 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Search, Wand2, Lightbulb } from 'lucide-react';
+import { Loader2, Search, Wand2, Lightbulb, Plus, X, Trash2 } from 'lucide-react';
 import { symptomCheck } from '@/ai/flows/symptom-checker';
 import SearchDialog from './doctors/search-dialog';
 import { doctors } from '@/lib/data';
+import { Badge } from '@/components/ui/badge';
 
 export default function SymptomChecker() {
-  const [symptoms, setSymptoms] = useState('');
+  const [symptomsList, setSymptomsList] = useState<string[]>([]);
+  const [currentSymptom, setCurrentSymptom] = useState('');
   const [result, setResult] = useState<{ specialization: string; reasoning: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [initialSearchTerm, setInitialSearchTerm] = useState('');
 
+  const handleAddSymptom = () => {
+    if (currentSymptom.trim()) {
+      setSymptomsList([...symptomsList, currentSymptom.trim()]);
+      setCurrentSymptom('');
+    }
+  };
+
+  const handleRemoveSymptom = (indexToRemove: number) => {
+    setSymptomsList(symptomsList.filter((_, index) => index !== indexToRemove));
+  };
+  
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleAddSymptom();
+    }
+  };
+
   const handleSymptomCheck = async () => {
-    if (!symptoms) return;
+    if (symptomsList.length === 0) return;
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await symptomCheck({ symptoms });
+      const symptomsString = symptomsList.join('\n- ');
+      const response = await symptomCheck({ symptoms: `- ${symptomsString}` });
       setResult(response);
     } catch (error) {
       console.error('Symptom check error:', error);
@@ -58,23 +79,41 @@ export default function SymptomChecker() {
             فحص الأعراض بالذكاء الاصطناعي
           </CardTitle>
           <CardDescription className="text-lg text-muted-foreground pt-2">
-            لست متأكدًا من الطبيب الذي يجب أن تراه؟ صف أعراضك ودعنا نساعدك.
+            لست متأكدًا من الطبيب الذي يجب أن تراه؟ أضف أعراضك ودعنا نساعدك.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Textarea
-              placeholder="مثال: أشعر بألم في الصدر وضيق في التنفس عند صعود السلالم..."
-              rows={5}
-              value={symptoms}
-              onChange={(e) => setSymptoms(e.target.value)}
-              className="text-base"
-            />
+            <div className="flex gap-2">
+              <Input
+                placeholder="مثال: ألم في الصدر"
+                value={currentSymptom}
+                onChange={(e) => setCurrentSymptom(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="text-base"
+              />
+              <Button variant="outline" onClick={handleAddSymptom} disabled={!currentSymptom.trim()}>
+                <Plus className="h-5 w-5" />
+                <span className="hidden sm:inline sm:mr-2">إضافة عرض</span>
+              </Button>
+            </div>
+             {symptomsList.length > 0 && (
+                <div className="p-4 border rounded-lg bg-muted/50 flex flex-wrap gap-2">
+                    {symptomsList.map((symptom, index) => (
+                    <Badge key={index} variant="secondary" className="text-base py-1 px-3 flex items-center gap-2">
+                        {symptom}
+                        <button onClick={() => handleRemoveSymptom(index)} className="rounded-full hover:bg-destructive/20 p-0.5">
+                            <X className="h-3 w-3" />
+                        </button>
+                    </Badge>
+                    ))}
+                </div>
+            )}
             <Button
               size="lg"
               variant="accent"
               onClick={handleSymptomCheck}
-              disabled={isLoading || !symptoms}
+              disabled={isLoading || symptomsList.length === 0}
               className="w-full"
             >
               {isLoading ? (
