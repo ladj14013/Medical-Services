@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { Doctor } from '@/lib/types';
 import { X, ImagePlus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
 const loggedInDoctorId = '1';
