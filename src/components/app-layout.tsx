@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Bell,
-  Home,
   LayoutGrid,
   LogIn,
   Search,
@@ -47,10 +46,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { currentUser } from '@/lib/data';
 import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
-import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import SearchDialog from './doctors/search-dialog';
+import { doctors } from '@/lib/data';
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -123,6 +123,8 @@ function AppLayoutContent({
   // In a real app, this would be based on a proper auth session
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+
 
   useEffect(() => {
     // This is a simple way to persist auth state across navigation
@@ -285,15 +287,15 @@ function AppLayoutContent({
   );
   
   const authenticatedMenu = [
-    { href: '/', label: 'البحث عن طبيب', icon: Search },
-    { href: '/dashboard/patient', label: 'مواعيــدي', icon: LayoutGrid },
-    { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+    { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
+    { id: 'appointments', href: '/dashboard/patient', label: 'مواعيــدي', icon: LayoutGrid },
+    { id: 'profile', href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
 
   const unauthenticatedMenu = [
-    { href: '/', label: 'البحث عن طبيب', icon: Search },
-    { href: '/login', label: 'تسجيل الدخول', icon: LogIn },
-    { href: '#', label: 'إنشاء حساب', icon: UserPlus, action: () => {} },
+    { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
+    { id: 'login', href: '/login', label: 'تسجيل الدخول', icon: LogIn },
+    { id: 'register', href: '#', label: 'إنشاء حساب', icon: UserPlus },
   ];
 
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
@@ -323,6 +325,11 @@ function AppLayoutContent({
 
   return (
       <>
+        <SearchDialog 
+            isOpen={isSearchDialogOpen} 
+            setIsOpen={setIsSearchDialogOpen}
+            doctors={doctors}
+        />
         <Sidebar side="right" collapsible={sidebarCollapsible}>
           <SidebarHeader>
             <Logo />
@@ -330,14 +337,14 @@ function AppLayoutContent({
           <SidebarContent>
             <SidebarMenu>
               {currentMenuItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
+                <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
-                    asChild={!!item.href && item.href !== '#'}
+                    asChild={!!item.href}
                     isActive={pathname === item.href}
                     tooltip={item.label}
                     onClick={item.action}
                   >
-                    {item.href && item.href !== '#' ? (
+                    {item.href ? (
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -357,7 +364,7 @@ function AppLayoutContent({
             {/* Footer content if any */}
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset className="flex flex-col">
+        <SidebarInset>
          {header}
          <TopAdBanner />
           {mainContent}
