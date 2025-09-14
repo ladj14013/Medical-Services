@@ -298,47 +298,49 @@ function AppLayoutContent({
   }
 
   return (
-      <Sidebar side="right" collapsible={sidebarCollapsible}>
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {currentMenuItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  asChild={!!item.href && item.href !== '#'}
-                  isActive={pathname === item.href}
-                  tooltip={item.label}
-                  onClick={item.action}
-                >
-                  {item.href && item.href !== '#' ? (
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  ) : (
-                    <>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          {/* Footer content if any */}
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-       {header}
-       <TopAdBanner />
-        {mainContent}
-        {adFooter}
-        {appFooter}
-      </SidebarInset>
+      <>
+        <Sidebar side="right" collapsible={sidebarCollapsible}>
+          <SidebarHeader>
+            <Logo />
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {currentMenuItems.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                    asChild={!!item.href && item.href !== '#'}
+                    isActive={pathname === item.href}
+                    tooltip={item.label}
+                    onClick={item.action}
+                  >
+                    {item.href && item.href !== '#' ? (
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    ) : (
+                      <>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            {/* Footer content if any */}
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset className="flex flex-col">
+         {header}
+         <TopAdBanner />
+          {mainContent}
+          {adFooter}
+          {appFooter}
+        </SidebarInset>
+      </>
   );
 }
 
