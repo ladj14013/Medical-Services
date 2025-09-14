@@ -128,6 +128,7 @@ export const currentUser: User = {
     id: 'user1',
     name: 'أليكس دو',
     email: 'alex.doe@example.com',
+    phoneNumber: '555-123-4567',
     medicalHistory: 'لا يوجد تاريخ طبي مهم. حساسية من البنسلين.',
     avatarId: 'user-avatar'
 }

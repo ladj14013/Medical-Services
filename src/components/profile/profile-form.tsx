@@ -7,6 +7,7 @@ import { currentUser } from '@/lib/data';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,10 +18,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Lock } from 'lucide-react';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'يجب أن يتكون الاسم من حرفين على الأقل.'),
   email: z.string().email('عنوان بريد إلكتروني غير صالح.'),
+  phoneNumber: z.string().optional(),
   medicalHistory: z.string().optional(),
 });
 
@@ -34,12 +37,19 @@ export default function ProfileForm() {
     defaultValues: {
       name: currentUser.name || '',
       email: currentUser.email || '',
+      phoneNumber: currentUser.phoneNumber || '',
       medicalHistory: currentUser.medicalHistory || '',
     },
   });
 
   function onSubmit(data: ProfileFormValues) {
-    console.log(data);
+    // In a real app, you would only submit the editable fields
+    const updatedData = {
+        name: data.name,
+        email: data.email,
+        phoneNumber: data.phoneNumber
+    }
+    console.log(updatedData);
     toast({
       title: 'تم تحديث الملف الشخصي',
       description: 'تم حفظ معلوماتك الشخصية.',
@@ -50,37 +60,52 @@ export default function ProfileForm() {
     <Card>
         <CardHeader>
             <CardTitle>المعلومات الشخصية</CardTitle>
-            <CardDescription>قم بتحديث بياناتك الشخصية وتاريخك الطبي هنا.</CardDescription>
+            <CardDescription>قم بتحديث بياناتك الشخصية هنا. التاريخ الطبي لا يمكن تعديله إلا من قبل الأطباء.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>الاسم الكامل</FormLabel>
-                    <FormControl>
-                        <Input placeholder="اسمك" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>عنوان البريد الإلكتروني</FormLabel>
-                    <FormControl>
-                        <Input type="email" placeholder="your@email.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>الاسم الكامل</FormLabel>
+                        <FormControl>
+                            <Input placeholder="اسمك" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>عنوان البريد الإلكتروني</FormLabel>
+                        <FormControl>
+                            <Input type="email" placeholder="your@email.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>رقم الهاتف</FormLabel>
+                        <FormControl>
+                            <Input placeholder="رقم هاتفك" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
                 <FormField
                 control={form.control}
                 name="medicalHistory"
@@ -88,12 +113,19 @@ export default function ProfileForm() {
                     <FormItem>
                     <FormLabel>التاريخ الطبي</FormLabel>
                     <FormControl>
-                        <Textarea
-                        placeholder="مثال: الحساسية، العمليات الجراحية السابقة ..."
-                        className="resize-none"
-                        {...field}
-                        />
+                        <div className="relative">
+                            <Textarea
+                                placeholder="لا يوجد تاريخ طبي مسجل."
+                                className="resize-none pr-10 bg-muted/50"
+                                {...field}
+                                readOnly
+                            />
+                             <Lock className="absolute top-3 right-3 h-4 w-4 text-muted-foreground" />
+                        </div>
                     </FormControl>
+                     <FormDescription>
+                        هذا الحقل يمكن تعديله فقط من قبل مقدمي الرعاية الصحية المعتمدين.
+                    </FormDescription>
                     <FormMessage />
                     </FormItem>
                 )}
