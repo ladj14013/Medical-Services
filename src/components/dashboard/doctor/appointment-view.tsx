@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import type { Appointment } from '@/lib/types';
+import type { Appointment, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, X } from 'lucide-react';
+import { Calendar, Clock, User as UserIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { currentUser } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -21,12 +20,17 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+interface AppointmentViewProps {
+  initialAppointments: Appointment[];
+  patient: User; // In a real app, you'd get the specific patient for each appointment
+}
 
-export default function AppointmentView({ appointments: initialAppointments }: { appointments: Appointment[] }) {
+export default function AppointmentView({ initialAppointments, patient }: AppointmentViewProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const { toast } = useToast();
 
   const handleCancel = (id: string) => {
+    // This would be an API call in a real app
     setAppointments((prev) => prev.filter((apt) => apt.id !== id));
     toast({
       title: 'تم إلغاء الموعد',
@@ -51,8 +55,8 @@ export default function AppointmentView({ appointments: initialAppointments }: {
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                         <div className='flex-1'>
                              <p className="flex items-center gap-2 font-semibold">
-                                <User className="w-5 h-5 text-primary" />
-                                {currentUser.name} {/* In a real app, this would be the actual patient's name */}
+                                <UserIcon className="w-5 h-5 text-primary" />
+                                {patient.name} {/* In a real app, this would be the actual patient's name */}
                             </p>
                              <p className="text-sm text-muted-foreground mt-1">
                                 السبب: {apt.reason || 'غير محدد'}

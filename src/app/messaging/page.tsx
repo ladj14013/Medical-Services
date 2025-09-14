@@ -6,33 +6,67 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Send } from 'lucide-react';
 import type { Doctor } from '@/lib/types';
 import ChatWindow from '@/components/messaging/chat-window';
-import { doctors } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MessagingPage() {
     const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+    const [loggedInDoctor, setLoggedInDoctor] = useState<Doctor | null>(null);
+    const [connections, setConnections] = useState<Doctor[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
     const loggedInDoctorId = '1';
-    const loggedInDoctor = doctors.find(doc => doc.id === loggedInDoctorId);
 
     useEffect(() => {
-        // On component mount, check session storage for a previously selected doctor
-        const storedDoctorId = sessionStorage.getItem('selectedDoctorId');
-        if (storedDoctorId) {
-            const doctor = doctors.find(doc => doc.id === storedDoctorId);
-            if (doctor) {
-                setSelectedDoctor(doctor);
+        async function fetchInitialData() {
+            setIsLoading(true);
+            try {
+                const doctorsRes = await fetch('/api/doctors');
+                const allDoctors: Doctor[] = await doctorsRes.json();
+                
+                const loggedInDoc = allDoctors.find(doc => doc.id === loggedInDoctorId);
+                setLoggedInDoctor(loggedInDoc || null);
+
+                if (loggedInDoc) {
+                    const doctorConnections = allDoctors.filter(doc => loggedInDoc.connections?.includes(doc.id));
+                    setConnections(doctorConnections);
+
+                    const storedDoctorId = sessionStorage.getItem('selectedDoctorId');
+                    if (storedDoctorId) {
+                        const doctor = doctorConnections.find(doc => doc.id === storedDoctorId);
+                        if (doctor) {
+                            setSelectedDoctor(doctor);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch messaging data:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
+        fetchInitialData();
     }, []);
 
     const handleSelectConnection = (doctor: Doctor) => {
         setSelectedDoctor(doctor);
-        // Store the selected doctor's ID in session storage
         sessionStorage.setItem('selectedDoctorId', doctor.id);
     };
 
-    if (!loggedInDoctor) return null; // Or show an error state
+    if (isLoading) {
+        return (
+            <AppLayout>
+                <div className="flex-1 p-4 sm:p-8">
+                    <Skeleton className="h-10 w-48 mb-6" />
+                    <div className="grid gap-6 md:grid-cols-[350px_1fr] h-[calc(100vh-220px)]">
+                        <Skeleton className="h-full w-full" />
+                        <Skeleton className="h-full w-full" />
+                    </div>
+                </div>
+            </AppLayout>
+        );
+    }
+    
+    if (!loggedInDoctor) return <AppLayout><div className="p-8">لم يتم العثور على الطبيب المسجل.</div></AppLayout>;
 
     return (
         <AppLayout>
@@ -51,6 +85,7 @@ export default function MessagingPage() {
                 <div className="grid gap-6 md:grid-cols-[350px_1fr] h-[calc(100vh-220px)]">
                     <div className="md:col-span-1">
                         <ConnectionsList 
+                            connections={connections}
                             onSelectConnection={handleSelectConnection}
                             selectedConnectionId={selectedDoctor?.id}
                         />

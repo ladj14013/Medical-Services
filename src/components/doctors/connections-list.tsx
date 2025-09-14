@@ -1,5 +1,4 @@
 'use client';
-import { doctors } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import data from '@/lib/placeholder-images.json';
@@ -8,19 +7,13 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
 interface ConnectionsListProps {
+    connections: Doctor[];
     onSelectConnection: (doctor: Doctor) => void;
     selectedConnectionId?: string;
     inDialog?: boolean;
 }
 
-export default function ConnectionsList({ onSelectConnection, selectedConnectionId, inDialog = false }: ConnectionsListProps) {
-    // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
-    const loggedInDoctorId = '1';
-    const loggedInDoctor = doctors.find(doc => doc.id === loggedInDoctorId);
-    
-    if (!loggedInDoctor) return null;
-
-    const connections = doctors.filter(doc => loggedInDoctor.connections?.includes(doc.id));
+export default function ConnectionsList({ connections, onSelectConnection, selectedConnectionId, inDialog = false }: ConnectionsListProps) {
     
     const ListContent = () => (
         <ScrollArea className="h-full">

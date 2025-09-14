@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { currentUser } from '@/lib/data';
+import type { User } from '@/lib/types';
 import {
   Form,
   FormControl,
@@ -29,27 +29,26 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-export default function ProfileForm() {
+interface ProfileFormProps {
+  user: User;
+}
+
+export default function ProfileForm({ user }: ProfileFormProps) {
   const { toast } = useToast();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: currentUser.name || '',
-      email: currentUser.email || '',
-      phoneNumber: currentUser.phoneNumber || '',
-      medicalHistory: currentUser.medicalHistory || '',
+      name: user.name || '',
+      email: user.email || '',
+      phoneNumber: user.phoneNumber || '',
+      medicalHistory: user.medicalHistory || '',
     },
   });
 
   function onSubmit(data: ProfileFormValues) {
-    // In a real app, you would only submit the editable fields
-    const updatedData = {
-        name: data.name,
-        email: data.email,
-        phoneNumber: data.phoneNumber
-    }
-    console.log(updatedData);
+    // In a real app, you would send this to an API endpoint to update the user
+    console.log(data);
     toast({
       title: 'تم تحديث الملف الشخصي',
       description: 'تم حفظ معلوماتك الشخصية.',

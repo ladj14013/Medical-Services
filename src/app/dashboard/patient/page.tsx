@@ -3,7 +3,6 @@
 import AppLayout from '@/components/app-layout';
 import AppointmentList from '@/components/dashboard/appointment-list';
 import { Button } from '@/components/ui/button';
-import { currentUser } from '@/lib/data';
 import { LogOut } from 'lucide-react';
 
 export default function PatientDashboardPage() {

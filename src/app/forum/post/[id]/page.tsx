@@ -1,19 +1,30 @@
-
 import AppLayout from '@/components/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { forumPosts } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { User, Send, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import data from '@/lib/placeholder-images.json';
+import type { ForumPost } from '@/lib/types';
+import { forumPosts as staticForumPosts } from '@/lib/data';
 
+async function getPost(id: string): Promise<ForumPost | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
+  try {
+    const res = await fetch(`${baseUrl}/api/forum/posts/${id}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch (error) {
+    console.error('Failed to fetch post:', error);
+    return null;
+  }
+}
 
-export default function ForumPostPage({ params }: { params: { id: string } }) {
-    const post = forumPosts.find(p => p.id === params.id);
+export default async function ForumPostPage({ params }: { params: { id: string } }) {
+    const post = await getPost(params.id);
 
     if (!post) {
         notFound();
@@ -109,7 +120,7 @@ export default function ForumPostPage({ params }: { params: { id: string } }) {
 }
 
 export async function generateStaticParams() {
-  return forumPosts.map((post) => ({
+  return staticForumPosts.map((post) => ({
     id: post.id,
   }));
 }

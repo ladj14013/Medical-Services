@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { appointments as initialAppointments } from '@/lib/data';
+import { useState, useEffect } from 'react';
 import type { Appointment } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,36 @@ import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
+import { Skeleton } from '../ui/skeleton';
 
 export default function AppointmentList() {
-  const [appointments, setAppointments] =
-    useState<Appointment[]>(initialAppointments);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/appointments?userId=user1'); // Using placeholder userId
+        const data = await res.json();
+        setAppointments(data);
+      } catch (error) {
+        console.error('Failed to fetch appointments:', error);
+        toast({
+          title: 'خطأ',
+          description: 'فشل في تحميل المواعيد.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, [toast]);
+
   const handleCancel = (id: string) => {
+    // In a real app, this would be a DELETE or PATCH request to the API
     setAppointments((prev) =>
       prev.map((apt) =>
         apt.id === id ? { ...apt, status: 'cancelled' } : apt
@@ -32,6 +54,24 @@ export default function AppointmentList() {
   const upcomingAppointments = appointments.filter(
     (apt) => apt.status === 'upcoming'
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(2)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-4 w-1/4 mt-1" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

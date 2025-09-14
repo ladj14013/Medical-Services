@@ -1,6 +1,5 @@
 import AppLayout from '@/components/app-layout';
 import BookingClient from '@/components/doctors/booking-client';
-import { doctors } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import data from '@/lib/placeholder-images.json';
@@ -15,13 +14,32 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import type { Doctor } from '@/lib/types';
+import { doctors as staticDoctors } from '@/lib/data';
 
-export default function DoctorProfilePage({
+async function getDoctor(id: string): Promise<Doctor | null> {
+  try {
+    // In a real app, you might use a more robust fetching library like SWR or React Query
+    // For server components, a direct fetch is fine.
+    // The URL should be absolute for server-side fetching.
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
+    const res = await fetch(`${baseUrl}/api/doctors/${id}`, { cache: 'no-store' });
+    if (!res.ok) {
+      return null;
+    }
+    return res.json();
+  } catch (error) {
+    console.error('Failed to fetch doctor', error);
+    return null;
+  }
+}
+
+export default async function DoctorProfilePage({
   params,
 }: {
   params: { id: string };
 }) {
-  const doctor = doctors.find((doc) => doc.id === params.id);
+  const doctor = await getDoctor(params.id);
 
   if (!doctor) {
     notFound();
@@ -119,7 +137,8 @@ export default function DoctorProfilePage({
 }
 
 export async function generateStaticParams() {
-  return doctors.map((doctor) => ({
+  // Use the static data for generating params as it's cheap
+  return staticDoctors.map((doctor) => ({
     id: doctor.id,
   }));
 }

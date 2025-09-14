@@ -50,24 +50,19 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { currentUser, doctors as allDoctors, messages as initialMessages } from '@/lib/data';
 import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import SearchDialog from './doctors/search-dialog';
 import RegisterAsDialog from './auth/register-as-dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import type { Message, Doctor } from '@/lib/types';
+import type { Message, Doctor, User } from '@/lib/types';
 import MessagingDialog from './messaging/messaging-dialog';
 
-
-const userAvatar = data.placeholderImages.find(
-  (img) => img.id === currentUser.avatarId
-);
 
 const topAdImage = data.placeholderImages.find(
     (img) => img.id === 'ad-banner-top'
@@ -134,36 +129,18 @@ function AppLayoutContent({
 }) {
   const pathname = usePathname();
   const { toast } = useToast();
-  // In a real app, this would be based on a proper auth session
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'patient' | 'doctor' | 'admin' | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | Doctor | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isRegisterAsDialogOpen, setIsRegisterAsDialogOpen] = useState(false);
   const [isMessagingDialogOpen, setIsMessagingDialogOpen] = useState(false);
   
-  // For prototype, assume doctor '1' is logged in
-  const loggedInDoctorId = '1';
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   
-  const unreadMessages = messages.filter(m => m.recipientId === loggedInDoctorId && !m.read);
-
-  const handleConnectionRequest = (messageId: string, accepted: boolean) => {
-    setMessages(prevMessages => 
-        prevMessages.map(msg => {
-            if (msg.id === messageId) {
-                const sender = allDoctors.find(d => d.id === msg.senderId);
-                toast({
-                    title: accepted ? 'تم قبول الاتصال' : 'تم رفض الاتصال',
-                    description: accepted ? `أصبحت الآن متصلاً بـ ${sender?.name || 'طبيب'}.` : `لقد رفضت طلب الاتصال من ${sender?.name || 'طبيب'}.`,
-                });
-                return { ...msg, read: true, requestStatus: accepted ? 'accepted' : 'rejected' };
-            }
-            return msg;
-        })
-    );
-  };
-
+  const loggedInDoctorId = '1';
+  const loggedInUserId = 'user1';
 
   useEffect(() => {
     setIsClient(true);
@@ -174,22 +151,53 @@ function AppLayoutContent({
       setIsAuthenticated(true);
       setUserRole(role);
     }
+  }, []);
 
-    // This is a prototype-specific hack to set role based on URL
-    if (authStatus === 'true') {
-        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum') || pathname.startsWith('/profile/doctor-settings') || pathname.startsWith('/messaging')) {
-            setUserRole('doctor');
-            sessionStorage.setItem('userRole', 'doctor');
-        } else if (pathname.startsWith('/dashboard/patient') || pathname.startsWith('/profile')) {
-            setUserRole('patient');
-            sessionStorage.setItem('userRole', 'patient');
-        } else if (pathname.startsWith('/dashboard')) {
-             setUserRole('admin');
-            sessionStorage.setItem('userRole', 'admin');
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    async function fetchUser() {
+      const role = sessionStorage.getItem('userRole');
+      const id = role === 'doctor' ? loggedInDoctorId : loggedInUserId;
+      const endpoint = role === 'doctor' ? `/api/doctors/${id}` : `/api/users/${id}`;
+      
+      try {
+        const res = await fetch(endpoint);
+        const userData = await res.json();
+        setLoggedInUser(userData);
+        
+        if (role === 'doctor') {
+            const messagesRes = await fetch(`/api/messages?userId=${id}`);
+            const messagesData = await messagesRes.json();
+            setMessages(messagesData);
         }
-    }
 
-  }, [pathname]);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    }
+    fetchUser();
+  }, [isAuthenticated]);
+
+  const unreadMessages = loggedInUser && userRole === 'doctor' 
+    ? messages.filter(m => m.recipientId === loggedInUser.id && !m.read)
+    : [];
+
+  const handleConnectionRequest = (messageId: string, accepted: boolean) => {
+    const messageToUpdate = messages.find(m => m.id === messageId);
+    if (!messageToUpdate) return;
+    
+    // In a real app, this would be a PATCH request to an API endpoint
+    setMessages(prevMessages => 
+        prevMessages.map(msg => msg.id === messageId ? { ...msg, read: true, requestStatus: accepted ? 'accepted' : 'rejected' } : msg)
+    );
+    
+    const sender = { name: messageToUpdate.senderName }; // Simplified for now
+    toast({
+        title: accepted ? 'تم قبول الاتصال' : 'تم رفض الاتصال',
+        description: accepted ? `أصبحت الآن متصلاً بـ ${sender?.name || 'طبيب'}.` : `لقد رفضت طلب الاتصال من ${sender?.name || 'طبيب'}.`,
+    });
+  };
 
   useEffect(() => {
     if (pathname.startsWith('/login')) {
@@ -210,12 +218,10 @@ function AppLayoutContent({
   }, [pathname]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isAuthenticated');
-    sessionStorage.removeItem('userRole');
-    sessionStorage.removeItem('loginRole');
-    sessionStorage.removeItem('selectedDoctorId'); // Clean up on logout
+    sessionStorage.clear();
     setIsAuthenticated(false);
     setUserRole(null);
+    setLoggedInUser(null);
     if (typeof window !== 'undefined') {
         window.location.href = '/';
     }
@@ -225,10 +231,7 @@ function AppLayoutContent({
   const isLoginPage = pathname.startsWith('/login');
   const isRegisterPage = pathname.startsWith('/register');
   
-  const loggedInDoctor = allDoctors.find(d => d.id === loggedInDoctorId);
-  const loggedInUser = userRole === 'doctor' 
-    ? (loggedInDoctor || { name: 'Doctor' }) 
-    : currentUser;
+  const userAvatar = data.placeholderImages.find(img => loggedInUser && img.id === ('avatarId' in loggedInUser ? loggedInUser.avatarId : loggedInUser.imageId));
 
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -239,7 +242,7 @@ function AppLayoutContent({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {isClient && isAuthenticated ? (
+          {isClient && isAuthenticated && loggedInUser ? (
             <>
                 <span className="text-sm text-muted-foreground hidden sm:inline">
                     مرحباً بعودتك، {loggedInUser.name}!
@@ -471,7 +474,7 @@ function AppLayoutContent({
             isOpen={isRegisterAsDialogOpen}
             setIsOpen={setIsRegisterAsDialogOpen}
         />
-        {loggedInDoctor && (
+        {loggedInUser && userRole === 'doctor' && (
             <MessagingDialog 
                 isOpen={isMessagingDialogOpen}
                 setIsOpen={setIsMessagingDialogOpen}

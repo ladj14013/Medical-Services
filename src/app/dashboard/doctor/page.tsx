@@ -1,45 +1,94 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/app-layout';
-import { appointments, doctors, currentUser } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import data from '@/lib/placeholder-images.json';
-import { Briefcase, CalendarDays, Clock, MessageSquare, Users, Printer } from 'lucide-react';
+import { CalendarDays, Users, Printer } from 'lucide-react';
 import AppointmentView from '@/components/dashboard/doctor/appointment-view';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import PrintableList from '@/components/dashboard/doctor/printable-list';
+import type { Appointment, Doctor, User } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DoctorDashboardPage() {
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [patient, setPatient] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [printDate, setPrintDate] = useState<Date | undefined>(new Date());
+  
   // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
   const loggedInDoctorId = '1';
-  const doctor = doctors.find((doc) => doc.id === loggedInDoctorId && doc.status === 'approved');
 
-  if (!doctor) {
-    // Or redirect to a "not authorized" page
-    notFound();
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [doctorRes, appointmentsRes, patientRes] = await Promise.all([
+          fetch(`/api/doctors/${loggedInDoctorId}`),
+          fetch(`/api/appointments?doctorId=${loggedInDoctorId}`),
+          fetch('/api/users/user1') // Fetching the default patient user
+        ]);
+        
+        if (!doctorRes.ok) throw new Error('Doctor not found');
+
+        const doctorData = await doctorRes.json();
+        const appointmentsData = await appointmentsRes.json();
+        const patientData = await patientRes.json();
+
+        if (doctorData.status !== 'approved') throw new Error('Doctor not approved');
+
+        setDoctor(doctorData);
+        setAppointments(appointmentsData);
+        setPatient(patientData);
+
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        // Handle not found or not approved cases
+        notFound();
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading || !doctor || !patient) {
+    return (
+      <AppLayout>
+        <div className="flex-1 space-y-4 p-4 sm:p-8">
+          <div className="flex items-center justify-between space-y-2">
+            <Skeleton className="h-9 w-64" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+               <Skeleton className="h-40 w-full rounded-lg" />
+               <Skeleton className="h-40 w-full rounded-lg" />
+               <Skeleton className="h-40 w-full rounded-lg" />
+          </div>
+          <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-28 w-full rounded-lg" />
+              <Skeleton className="h-28 w-full rounded-lg" />
+          </div>
+        </div>
+      </AppLayout>
+    );
   }
-
-  const [printDate, setPrintDate] = useState<Date | undefined>(new Date());
-
-  const doctorImage = data.placeholderImages.find((img) => img.id === doctor.imageId);
   
   const today = new Date();
   const todayFormatted = format(today, 'yyyy-MM-dd');
 
   const upcomingAppointments = appointments.filter(
-    (apt) => apt.doctorId === doctor.id && apt.status === 'upcoming'
+    (apt) => apt.status === 'upcoming'
   );
   
   const todaysAppointments = upcomingAppointments.filter(apt => apt.date === todayFormatted);
   
   const appointmentsForPrintDate = printDate ? appointments.filter(
-    (apt) => apt.doctorId === doctor.id && apt.date === format(printDate, 'yyyy-MM-dd')
+    (apt) => apt.date === format(printDate, 'yyyy-MM-dd')
   ) : [];
 
   const handlePrint = () => {
@@ -83,7 +132,7 @@ export default function DoctorDashboardPage() {
             </Card>
         </div>
 
-        <AppointmentView appointments={upcomingAppointments} />
+        <AppointmentView initialAppointments={upcomingAppointments} patient={patient} />
         
         <Card className="no-print">
             <CardHeader>
@@ -105,7 +154,7 @@ export default function DoctorDashboardPage() {
                         <div className="space-y-2">
                             {appointmentsForPrintDate.map(apt => (
                                 <div key={apt.id} className="text-sm p-2 bg-muted/50 rounded-md">
-                                    {apt.time} - {currentUser.name}
+                                    {apt.time} - {patient.name}
                                 </div>
                             ))}
                         </div>
@@ -125,7 +174,7 @@ export default function DoctorDashboardPage() {
         appointments={appointmentsForPrintDate}
         doctor={doctor}
         date={printDate}
-        patient={currentUser}
+        patient={patient}
       />
     </AppLayout>
   );

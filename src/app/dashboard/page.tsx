@@ -1,20 +1,37 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { doctors as allDoctors } from '@/lib/data';
 import type { Doctor } from '@/lib/types';
 import { Check, ShieldCheck, X } from 'lucide-react';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminDashboardPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>(allDoctors);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/doctors?status=all'); // A new param to fetch all doctors
+        const data = await res.json();
+        setDoctors(data);
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
   const handleApproval = (id: string, newStatus: 'approved' | 'rejected') => {
+    // In a real app, this would be a PATCH request to an API
     setDoctors(doctors.map(doc => doc.id === id ? { ...doc, status: newStatus } : doc));
     toast({
         title: newStatus === 'approved' ? 'تمت الموافقة على الطبيب' : 'تم رفض الطبيب',
@@ -39,7 +56,12 @@ export default function AdminDashboardPage() {
                 <CardDescription>مراجعة والموافقة على طلبات الأطباء الجدد.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {pendingDoctors.length > 0 ? (
+                {isLoading ? (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <Skeleton className="h-64 w-full" />
+                        <Skeleton className="h-64 w-full" />
+                    </div>
+                ) : pendingDoctors.length > 0 ? (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {pendingDoctors.map(doctor => (
                             <Card key={doctor.id} className="flex flex-col">
