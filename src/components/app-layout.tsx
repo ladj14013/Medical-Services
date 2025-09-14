@@ -62,7 +62,8 @@ import RegisterAsDialog from './auth/register-as-dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import type { Message } from '@/lib/types';
+import type { Message, Doctor } from '@/lib/types';
+import MessagingDialog from './messaging/messaging-dialog';
 
 
 const userAvatar = data.placeholderImages.find(
@@ -140,6 +141,7 @@ function AppLayoutContent({
   const [isClient, setIsClient] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isRegisterAsDialogOpen, setIsRegisterAsDialogOpen] = useState(false);
+  const [isMessagingDialogOpen, setIsMessagingDialogOpen] = useState(false);
   
   // For prototype, assume doctor '1' is logged in
   const loggedInDoctorId = '1';
@@ -212,6 +214,7 @@ function AppLayoutContent({
     sessionStorage.removeItem('isAuthenticated');
     sessionStorage.removeItem('userRole');
     sessionStorage.removeItem('loginRole');
+    sessionStorage.removeItem('selectedDoctorId'); // Clean up on logout
     setIsAuthenticated(false);
     setUserRole(null);
     if (typeof window !== 'undefined') {
@@ -223,8 +226,9 @@ function AppLayoutContent({
   const isLoginPage = pathname.startsWith('/login');
   const isRegisterPage = pathname.startsWith('/register');
   
+  const loggedInDoctor = allDoctors.find(d => d.id === loggedInDoctorId);
   const loggedInUser = userRole === 'doctor' 
-    ? (allDoctors.find(d => d.id === loggedInDoctorId) || { name: 'Doctor' }) 
+    ? (loggedInDoctor || { name: 'Doctor' }) 
     : currentUser;
 
   const header = (
@@ -390,9 +394,9 @@ function AppLayoutContent({
   const doctorMenu = [
     { id: 'dashboard', href: '/dashboard/doctor', label: 'لوحة التحكم', icon: LayoutGrid },
     { id: 'forum', href: '/forum', label: 'المنتدى', icon: MessageSquare },
-    { id: 'messaging', href: '/messaging', label: 'المراسلة', icon: Send },
-    { id: 'settings', href: '/profile/doctor-settings', label: 'الإعدادات', icon: Settings },
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
+    { id: 'messaging', label: 'المراسلة', icon: Send, action: () => setIsMessagingDialogOpen(true) },
+    { id: 'settings', href: '/profile/doctor-settings', label: 'الإعدادات', icon: Settings },
   ];
 
   const unauthenticatedMenu = [
@@ -470,6 +474,13 @@ function AppLayoutContent({
             isOpen={isRegisterAsDialogOpen}
             setIsOpen={setIsRegisterAsDialogOpen}
         />
+        {loggedInDoctor && (
+            <MessagingDialog 
+                isOpen={isMessagingDialogOpen}
+                setIsOpen={setIsMessagingDialogOpen}
+                loggedInDoctor={loggedInDoctor}
+            />
+        )}
         <Sidebar side="right" collapsible={sidebarCollapsible}>
           <SidebarHeader>
             <Logo />

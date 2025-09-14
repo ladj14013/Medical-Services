@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/app-layout';
 import ConnectionsList from '@/components/doctors/connections-list';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,24 @@ export default function MessagingPage() {
     // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
     const loggedInDoctorId = '1';
     const loggedInDoctor = doctors.find(doc => doc.id === loggedInDoctorId);
+
+    useEffect(() => {
+        // On component mount, check session storage for a previously selected doctor
+        const storedDoctorId = sessionStorage.getItem('selectedDoctorId');
+        if (storedDoctorId) {
+            const doctor = doctors.find(doc => doc.id === storedDoctorId);
+            if (doctor) {
+                setSelectedDoctor(doctor);
+            }
+        }
+    }, []);
+
+    const handleSelectConnection = (doctor: Doctor) => {
+        setSelectedDoctor(doctor);
+        // Store the selected doctor's ID in session storage
+        sessionStorage.setItem('selectedDoctorId', doctor.id);
+    };
+
     if (!loggedInDoctor) return null; // Or show an error state
 
     return (
@@ -33,7 +51,7 @@ export default function MessagingPage() {
                 <div className="grid gap-6 md:grid-cols-[350px_1fr] h-[calc(100vh-220px)]">
                     <div className="md:col-span-1">
                         <ConnectionsList 
-                            onSelectConnection={setSelectedDoctor}
+                            onSelectConnection={handleSelectConnection}
                             selectedConnectionId={selectedDoctor?.id}
                         />
                     </div>
