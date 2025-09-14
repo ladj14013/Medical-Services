@@ -166,6 +166,10 @@ function AppLayoutContent({
         <div className="flex items-center gap-4">
           {isClient && isAuthenticated ? (
             <>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                    مرحباً بعودتك، {currentUser.name}!
+                </span>
+
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
