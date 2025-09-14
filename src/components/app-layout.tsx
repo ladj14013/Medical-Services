@@ -212,7 +212,7 @@ function AppLayoutContent({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link href="/dashboard" className="w-full">
+                    <Link href="/dashboard/patient" className="w-full">
                       المواعيد
                     </Link>
                   </DropdownMenuItem>
@@ -261,7 +261,7 @@ function AppLayoutContent({
   
   const authenticatedMenu = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
-    { href: '/dashboard', label: 'مواعيــدي', icon: LayoutGrid },
+    { href: '/dashboard/patient', label: 'مواعيــدي', icon: LayoutGrid },
     { href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
 
@@ -275,7 +275,7 @@ function AppLayoutContent({
   const sidebarCollapsible = (isHomePage && !isAuthenticated) ? 'none' : (isHomePage ? 'none' : 'icon');
   
   return (
-    <>
+    <SidebarProvider>
       <Sidebar side="right" collapsible={sidebarCollapsible}>
         <SidebarHeader>
           <Logo />
@@ -317,7 +317,7 @@ function AppLayoutContent({
         {adFooter}
         {appFooter}
       </SidebarInset>
-    </>
+    </SidebarProvider>
   );
 }
 

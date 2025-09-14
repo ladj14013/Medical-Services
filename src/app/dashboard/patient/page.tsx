@@ -1,17 +1,16 @@
 import AppLayout from '@/components/app-layout';
+import AppointmentList from '@/components/dashboard/appointment-list';
 
-export default function DashboardPage() {
+export default function PatientDashboardPage() {
   return (
     <AppLayout>
       <div className="flex-1 space-y-4 p-4 sm:p-8">
         <div className="flex items-center justify-between space-y-2">
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            لوحة التحكم
+            مواعيــدي
           </h1>
         </div>
-        <div className="text-center py-10">
-            <p className="text-muted-foreground">مرحباً بك في لوحة التحكم الخاصة بك.</p>
-        </div>
+        <AppointmentList />
       </div>
     </AppLayout>
   );
