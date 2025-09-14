@@ -24,6 +24,7 @@ export default function RegisterDoctorPage() {
   const [password, setPassword] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [license, setLicense] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +82,17 @@ export default function RegisterDoctorPage() {
                 required
                 value={license}
                 onChange={(e) => setLicense(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">رقم الهاتف</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="رقم هاتفك"
+                required
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
             <div className="space-y-2">
