@@ -478,7 +478,6 @@ function AppLayoutContent({
             <MessagingDialog 
                 isOpen={isMessagingDialogOpen}
                 setIsOpen={setIsMessagingDialogOpen}
-                loggedInDoctor={loggedInDoctor}
             />
         )}
         <Sidebar side="right" collapsible={sidebarCollapsible}>
