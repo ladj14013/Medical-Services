@@ -5,8 +5,16 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import data from '@/lib/placeholder-images.json';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Stethoscope } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { MapPin, Stethoscope, Send, GalleryVertical } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import SendMessageDialog from '@/components/doctors/send-message-dialog';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 export default function DoctorProfilePage({
   params,
@@ -55,14 +63,54 @@ export default function DoctorProfilePage({
               </CardContent>
             </Card>
              <Card>
-                <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold font-headline mb-2">حول</h2>
+                <CardHeader>
+                    <CardTitle className="text-xl font-semibold font-headline">حول</CardTitle>
+                </CardHeader>
+                <CardContent>
                     <p className="text-muted-foreground">{doctor.bio}</p>
                 </CardContent>
             </Card>
+             <SendMessageDialog recipient={doctor} />
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 space-y-8">
             <BookingClient doctor={doctor} />
+
+            {doctor.promotionalImages && doctor.promotionalImages.length > 0 && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-headline flex items-center gap-2">
+                            <GalleryVertical />
+                            معرض الصور
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                       <Carousel className="w-full max-w-xl mx-auto">
+                          <CarouselContent>
+                            {doctor.promotionalImages.map((image) => (
+                              <CarouselItem key={image.id}>
+                                <div className="p-1">
+                                  <Card className="overflow-hidden">
+                                    <CardContent className="flex aspect-[4/3] items-center justify-center p-0">
+                                       <Image 
+                                            src={image.url}
+                                            alt={image.hint}
+                                            width={600}
+                                            height={400}
+                                            className="object-cover w-full h-full"
+                                            data-ai-hint={image.hint}
+                                        />
+                                    </CardContent>
+                                  </Card>
+                                </div>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                          <CarouselPrevious />
+                          <CarouselNext />
+                        </Carousel>
+                    </CardContent>
+                </Card>
+            )}
           </div>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Home,
   Settings,
+  Mail,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -46,7 +47,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { currentUser, doctors as allDoctors } from '@/lib/data';
+import { currentUser, doctors as allDoctors, messages as allMessages } from '@/lib/data';
 import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
@@ -55,6 +56,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import SearchDialog from './doctors/search-dialog';
 import { doctors } from '@/lib/data';
 import RegisterAsDialog from './auth/register-as-dialog';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -130,6 +133,11 @@ function AppLayoutContent({
   const [isClient, setIsClient] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isRegisterAsDialogOpen, setIsRegisterAsDialogOpen] = useState(false);
+  
+  // For prototype, assume doctor '1' is logged in
+  const loggedInDoctorId = '1';
+  const unreadMessages = allMessages.filter(m => m.recipientId === loggedInDoctorId && !m.read);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -191,7 +199,7 @@ function AppLayoutContent({
   const isRegisterPage = pathname.startsWith('/register');
   
   const loggedInUser = userRole === 'doctor' 
-    ? (allDoctors.find(d => d.id === '1') || { name: 'Doctor' }) 
+    ? (allDoctors.find(d => d.id === loggedInDoctorId) || { name: 'Doctor' }) 
     : currentUser;
 
   const header = (
@@ -213,42 +221,48 @@ function AppLayoutContent({
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full relative">
                     <Bell />
-                    <span className="absolute top-1 right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">2</span>
+                     {unreadMessages.length > 0 && userRole === 'doctor' && (
+                        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                            {unreadMessages.length}
+                        </span>
+                     )}
                     <span className="sr-only">الإشعارات</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-80">
+                <PopoverContent align="end" className="w-96">
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <h4 className="font-medium leading-none">الإشعارات</h4>
-                      <p className="text-sm text-muted-foreground">
-                        لديك رسالتان جديدتان.
-                      </p>
+                       {userRole !== 'doctor' || unreadMessages.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            ليس لديك إشعارات جديدة.
+                        </p>
+                        ) : (
+                        <p className="text-sm text-muted-foreground">
+                           لديك {unreadMessages.length} رسائل جديدة.
+                        </p>
+                        )}
                     </div>
-                    <div className="grid gap-2">
-                      <div className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
-                        <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                        <div className="grid gap-1">
-                          <p className="text-sm font-medium">
-                            تذكير بالموعد
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            موعدك مع د. ريد غدًا.
-                          </p>
+                    {userRole === 'doctor' && unreadMessages.length > 0 && (
+                        <div className="grid gap-2">
+                         {unreadMessages.map(msg => (
+                            <div key={msg.id} className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                                <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
+                                <div className="grid gap-1">
+                                <p className="text-sm font-medium">
+                                    رسالة جديدة من {msg.senderName}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">
+                                    {msg.content}
+                                </p>
+                                 <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true, locale: ar })}
+                                </p>
+                                </div>
+                            </div>
+                         ))}
                         </div>
-                      </div>
-                      <div className="grid grid-cols-25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
-                        <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
-                        <div className="grid gap-1">
-                          <p className="text-sm font-medium">
-                            رسالة جديدة
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            أرسل لك د. شارما رسالة.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>

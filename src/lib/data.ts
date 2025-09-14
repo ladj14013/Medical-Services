@@ -1,4 +1,4 @@
-import type { Doctor, Appointment, User, ForumPost } from './types';
+import type { Doctor, Appointment, User, ForumPost, Message } from './types';
 
 export const doctors: Doctor[] = [
   {
@@ -15,6 +15,10 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-1',
     status: 'approved',
     dailyAppointmentLimit: 10,
+    promotionalImages: [
+        { id: 'promo-1', url: 'https://picsum.photos/seed/promo1/600/400', hint: 'clinic interior' },
+        { id: 'promo-2', url: 'https://picsum.photos/seed/promo2/600/400', hint: 'medical equipment' },
+    ],
   },
   {
     id: '2',
@@ -29,6 +33,9 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-2',
     status: 'approved',
     dailyAppointmentLimit: 8,
+    promotionalImages: [
+        { id: 'promo-3', url: 'https://picsum.photos/seed/promo3/600/400', hint: 'waiting room' },
+    ],
   },
   {
     id: '3',
@@ -43,6 +50,7 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-3',
     status: 'approved',
     dailyAppointmentLimit: 12,
+     promotionalImages: [],
   },
   {
     id: '4',
@@ -57,6 +65,9 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-4',
     status: 'approved',
     dailyAppointmentLimit: 5,
+    promotionalImages: [
+        { id: 'promo-1', url: 'https://picsum.photos/seed/promo1/600/400', hint: 'clinic interior' },
+    ],
   },
     {
     id: '5',
@@ -71,6 +82,7 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-5',
     status: 'approved',
     dailyAppointmentLimit: 10,
+    promotionalImages: [],
   },
   {
     id: '6',
@@ -85,6 +97,7 @@ export const doctors: Doctor[] = [
     imageId: 'doctor-6',
     status: 'approved',
     dailyAppointmentLimit: 9,
+    promotionalImages: [],
   },
    {
     id: '7',
@@ -179,3 +192,33 @@ export const forumPosts: ForumPost[] = [
       ]
     }
   ];
+
+  export const messages: Message[] = [
+    {
+        id: 'msg1',
+        senderId: '3',
+        recipientId: '1',
+        senderName: 'د. أنيا شارما',
+        content: 'مرحباً د. ريد، هل يمكنك إلقاء نظرة على تخطيط القلب الكهربائي هذا؟',
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        read: false,
+    },
+    {
+        id: 'msg2',
+        senderId: '4',
+        recipientId: '1',
+        senderName: 'د. جوليان تشين',
+        content: 'بخصوص دراسة الحالة، هل قمت بفحص مستويات الإلكتروليت؟',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        read: false,
+    },
+    {
+        id: 'msg3',
+        senderId: '2',
+        recipientId: '1',
+        senderName: 'د. ماركوس ثورن',
+        content: 'لدي سؤال حول مريض يعاني من أعراض جلدية وقلبية.',
+        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        read: true,
+    }
+  ]

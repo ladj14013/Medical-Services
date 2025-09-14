@@ -11,6 +11,7 @@ export interface Doctor {
   status: 'approved' | 'pending' | 'rejected';
   licenseNumber?: string;
   dailyAppointmentLimit?: number;
+  promotionalImages?: { id: string; url: string; hint: string }[];
 }
 
 export interface Appointment {
@@ -49,4 +50,14 @@ export interface ForumComment {
   authorName: string;
   date: string;
   content: string;
+}
+
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  senderName: string;
+  content: string;
+  timestamp: string;
+  read: boolean;
 }

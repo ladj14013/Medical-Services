@@ -65,6 +65,24 @@
         "description": "Bottom advertisement banner",
         "imageUrl": "https://picsum.photos/seed/ad2/1200/200",
         "imageHint": "advertisement banner"
+    },
+    {
+      "id": "promo-1",
+      "description": "Clinic Interior",
+      "imageUrl": "https://picsum.photos/seed/promo1/600/400",
+      "imageHint": "clinic interior"
+    },
+     {
+      "id": "promo-2",
+      "description": "Medical Equipment",
+      "imageUrl": "https://picsum.photos/seed/promo2/600/400",
+      "imageHint": "medical equipment"
+    },
+     {
+      "id": "promo-3",
+      "description": "Waiting Room",
+      "imageUrl": "https://picsum.photos/seed/promo3/600/400",
+      "imageHint": "waiting room"
     }
   ]
 }
