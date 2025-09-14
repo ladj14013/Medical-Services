@@ -112,7 +112,7 @@ export default function DoctorDashboardPage() {
                      ) : (
                         <p className="text-sm text-muted-foreground">لا توجد مواعيد في هذا التاريخ.</p>
                      )}
-                     <Button onClick={handlePrint} className="mt-4" disabled={appointmentsForPrint-date.length === 0}>
+                     <Button onClick={handlePrint} className="mt-4" disabled={appointmentsForPrintDate.length === 0}>
                         <Printer className="ml-2 h-4 w-4"/>
                         طباعة
                      </Button>
