@@ -19,6 +19,7 @@ export const doctors: Doctor[] = [
         { id: 'promo-1', url: 'https://picsum.photos/seed/promo1/600/400', hint: 'clinic interior' },
         { id: 'promo-2', url: 'https://picsum.photos/seed/promo2/600/400', hint: 'medical equipment' },
     ],
+    connections: ['2'],
   },
   {
     id: '2',
@@ -36,6 +37,7 @@ export const doctors: Doctor[] = [
     promotionalImages: [
         { id: 'promo-3', url: 'https://picsum.photos/seed/promo3/600/400', hint: 'waiting room' },
     ],
+    connections: ['1'],
   },
   {
     id: '3',
@@ -51,6 +53,7 @@ export const doctors: Doctor[] = [
     status: 'approved',
     dailyAppointmentLimit: 12,
      promotionalImages: [],
+     connections: [],
   },
   {
     id: '4',
@@ -68,6 +71,7 @@ export const doctors: Doctor[] = [
     promotionalImages: [
         { id: 'promo-1', url: 'https://picsum.photos/seed/promo1/600/400', hint: 'clinic interior' },
     ],
+    connections: [],
   },
     {
     id: '5',
@@ -83,6 +87,7 @@ export const doctors: Doctor[] = [
     status: 'approved',
     dailyAppointmentLimit: 10,
     promotionalImages: [],
+    connections: [],
   },
   {
     id: '6',
@@ -98,6 +103,7 @@ export const doctors: Doctor[] = [
     status: 'approved',
     dailyAppointmentLimit: 9,
     promotionalImages: [],
+    connections: [],
   },
    {
     id: '7',
@@ -199,26 +205,31 @@ export const forumPosts: ForumPost[] = [
         senderId: '3',
         recipientId: '1',
         senderName: 'د. أنيا شارما',
-        content: 'مرحباً د. ريد، هل يمكنك إلقاء نظرة على تخطيط القلب الكهربائي هذا؟',
+        content: 'مرحباً د. ريد، أود التواصل لمناقشة حالة مريض مشترك.',
         timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
         read: false,
+        type: 'request',
+        requestStatus: 'pending',
     },
     {
         id: 'msg2',
         senderId: '4',
         recipientId: '1',
         senderName: 'د. جوليان تشين',
-        content: 'بخصوص دراسة الحالة، هل قمت بفحص مستويات الإلكتروليت؟',
+        content: 'بخصوص دراسة الحالة في المنتدى، لدي بعض الأفكار التي أود مشاركتها.',
         timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         read: false,
+        type: 'request',
+        requestStatus: 'pending',
     },
     {
         id: 'msg3',
         senderId: '2',
         recipientId: '1',
         senderName: 'د. ماركوس ثورن',
-        content: 'لدي سؤال حول مريض يعاني من أعراض جلدية وقلبية.',
+        content: 'شكرًا على قبول طلب التواصل!',
         timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
         read: true,
+        type: 'message',
     }
   ]

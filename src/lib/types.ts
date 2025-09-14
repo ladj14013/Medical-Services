@@ -12,6 +12,7 @@ export interface Doctor {
   licenseNumber?: string;
   dailyAppointmentLimit?: number;
   promotionalImages?: { id: string; url: string; hint: string }[];
+  connections?: string[];
 }
 
 export interface Appointment {
@@ -60,4 +61,6 @@ export interface Message {
   content: string;
   timestamp: string;
   read: boolean;
+  type: 'request' | 'message';
+  requestStatus?: 'pending' | 'accepted' | 'rejected';
 }

@@ -16,6 +16,9 @@ import {
   Home,
   Settings,
   Mail,
+  UserCheck,
+  UserX,
+  Send,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -47,7 +50,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { currentUser, doctors as allDoctors, messages as allMessages } from '@/lib/data';
+import { currentUser, doctors as allDoctors, messages as initialMessages } from '@/lib/data';
 import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
@@ -58,6 +61,9 @@ import { doctors } from '@/lib/data';
 import RegisterAsDialog from './auth/register-as-dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
+import type { Message } from '@/lib/types';
+
 
 const userAvatar = data.placeholderImages.find(
   (img) => img.id === currentUser.avatarId
@@ -127,6 +133,7 @@ function AppLayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { toast } = useToast();
   // In a real app, this would be based on a proper auth session
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'patient' | 'doctor' | 'admin' | null>(null);
@@ -136,7 +143,25 @@ function AppLayoutContent({
   
   // For prototype, assume doctor '1' is logged in
   const loggedInDoctorId = '1';
-  const unreadMessages = allMessages.filter(m => m.recipientId === loggedInDoctorId && !m.read);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  
+  const unreadMessages = messages.filter(m => m.recipientId === loggedInDoctorId && !m.read);
+
+  const handleConnectionRequest = (messageId: string, accepted: boolean) => {
+    setMessages(prevMessages => 
+        prevMessages.map(msg => {
+            if (msg.id === messageId) {
+                const sender = allDoctors.find(d => d.id === msg.senderId);
+                toast({
+                    title: accepted ? 'تم قبول الاتصال' : 'تم رفض الاتصال',
+                    description: accepted ? `أصبحت الآن متصلاً بـ ${sender?.name || 'طبيب'}.` : `لقد رفضت طلب الاتصال من ${sender?.name || 'طبيب'}.`,
+                });
+                return { ...msg, read: true, requestStatus: accepted ? 'accepted' : 'rejected' };
+            }
+            return msg;
+        })
+    );
+  };
 
 
   useEffect(() => {
@@ -151,7 +176,7 @@ function AppLayoutContent({
 
     // This is a prototype-specific hack to set role based on URL
     if (authStatus === 'true') {
-        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum') || pathname.startsWith('/profile/doctor-settings')) {
+        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum') || pathname.startsWith('/profile/doctor-settings') || pathname.startsWith('/messaging')) {
             setUserRole('doctor');
             sessionStorage.setItem('userRole', 'doctor');
         } else if (pathname.startsWith('/dashboard/patient') || pathname.startsWith('/profile')) {
@@ -233,24 +258,24 @@ function AppLayoutContent({
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <h4 className="font-medium leading-none">الإشعارات</h4>
-                       {userRole !== 'doctor' || unreadMessages.length === 0 ? (
+                       {unreadMessages.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                             ليس لديك إشعارات جديدة.
                         </p>
                         ) : (
                         <p className="text-sm text-muted-foreground">
-                           لديك {unreadMessages.length} رسائل جديدة.
+                           لديك {unreadMessages.length} رسائل غير مقروءة.
                         </p>
                         )}
                     </div>
                     {userRole === 'doctor' && unreadMessages.length > 0 && (
                         <div className="grid gap-2">
                          {unreadMessages.map(msg => (
-                            <div key={msg.id} className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                            <div key={msg.id} className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0 border-b last:border-b-0">
                                 <span className="flex h-2 w-2 translate-y-1.5 rounded-full bg-primary" />
                                 <div className="grid gap-1">
                                 <p className="text-sm font-medium">
-                                    رسالة جديدة من {msg.senderName}
+                                    {msg.type === 'request' ? `طلب اتصال من ${msg.senderName}` : `رسالة جديدة من ${msg.senderName}`}
                                 </p>
                                 <p className="text-sm text-muted-foreground truncate">
                                     {msg.content}
@@ -258,6 +283,18 @@ function AppLayoutContent({
                                  <p className="text-xs text-muted-foreground">
                                     {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true, locale: ar })}
                                 </p>
+                                {msg.type === 'request' && msg.requestStatus === 'pending' && (
+                                    <div className="flex gap-2 mt-2">
+                                        <Button size="sm" onClick={() => handleConnectionRequest(msg.id, true)}>
+                                            <UserCheck className="ml-1 h-4 w-4" />
+                                            قبول
+                                        </Button>
+                                        <Button size="sm" variant="outline" onClick={() => handleConnectionRequest(msg.id, false)}>
+                                             <UserX className="ml-1 h-4 w-4" />
+                                            رفض
+                                        </Button>
+                                    </div>
+                                )}
                                 </div>
                             </div>
                          ))}
@@ -353,7 +390,8 @@ function AppLayoutContent({
   const doctorMenu = [
     { id: 'dashboard', href: '/dashboard/doctor', label: 'لوحة التحكم', icon: LayoutGrid },
     { id: 'forum', href: '/forum', label: 'المنتدى', icon: MessageSquare },
-    { id: 'settings', href: '/profile/doctor-settings', label: 'ملفي الشخصي', icon: Settings },
+    { id: 'messaging', href: '/messaging', label: 'المراسلة', icon: Send },
+    { id: 'settings', href: '/profile/doctor-settings', label: 'الإعدادات', icon: Settings },
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
   ];
 

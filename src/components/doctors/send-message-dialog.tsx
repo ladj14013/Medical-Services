@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -16,8 +15,9 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { Doctor } from '@/lib/types';
-import { Send } from 'lucide-react';
+import { Send, UserPlus } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
+import { doctors } from '@/lib/data';
 
 interface SendMessageDialogProps {
   recipient: Doctor;
@@ -29,6 +29,11 @@ export default function SendMessageDialog({ recipient }: SendMessageDialogProps)
   const [userRole, setUserRole] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // This would come from auth in a real app
+  const loggedInDoctorId = '1'; 
+  const loggedInDoctor = doctors.find(doc => doc.id === loggedInDoctorId);
+  const areConnected = loggedInDoctor?.connections?.includes(recipient.id);
+
   useEffect(() => {
     const role = sessionStorage.getItem('userRole');
     setUserRole(role);
@@ -37,24 +42,21 @@ export default function SendMessageDialog({ recipient }: SendMessageDialogProps)
   const handleSend = () => {
     if (message.trim()) {
       // In a real app, this would send the message to the backend.
+      // For now, it just simulates the action.
       console.log(`Sending message to ${recipient.name}: ${message}`);
-      toast({
-        title: 'تم إرسال الرسالة',
-        description: `تم إرسال رسالتك إلى ${recipient.name} بنجاح.`,
-      });
+      
+      const title = areConnected ? 'تم إرسال الرسالة' : 'تم إرسال طلب الاتصال';
+      const description = areConnected 
+        ? `تم إرسال رسالتك إلى ${recipient.name} بنجاح.`
+        : `تم إرسال طلب الاتصال الخاص بك إلى ${recipient.name}. سيتم إعلامك عند قبوله.`;
+
+      toast({ title, description });
       setMessage('');
       setIsOpen(false);
     }
   };
-
-  // Only show the message card if the logged-in user is a doctor
-  if (userRole !== 'doctor') {
-    return null;
-  }
   
-  // Don't show if viewing your own profile
-  const loggedInDoctorId = '1'; // This would come from auth
-  if (recipient.id === loggedInDoctorId) {
+  if (userRole !== 'doctor' || recipient.id === loggedInDoctorId) {
     return null;
   }
 
@@ -64,29 +66,32 @@ export default function SendMessageDialog({ recipient }: SendMessageDialogProps)
           <CardContent className="p-4 text-center">
             <DialogTrigger asChild>
               <Button variant="outline" className="w-full">
-                <Send className="ml-2 h-4 w-4" />
-                إرسال رسالة
+                {areConnected ? <Send className="ml-2 h-4 w-4" /> : <UserPlus className="ml-2 h-4 w-4" />}
+                {areConnected ? 'إرسال رسالة' : 'إرسال طلب اتصال'}
               </Button>
             </DialogTrigger>
           </CardContent>
       </Card>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إرسال رسالة إلى {recipient.name}</DialogTitle>
+          <DialogTitle>
+             {areConnected ? `إرسال رسالة إلى ${recipient.name}` : `إرسال طلب اتصال إلى ${recipient.name}`}
+          </DialogTitle>
           <DialogDescription>
-            سيتم إخطار الطبيب برسالتك.
+            {areConnected 
+              ? 'سيتم إخطار الطبيب برسالتك.' 
+              : 'إذا قبل الطبيب طلبك، ستتمكنان من التواصل مباشرة.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="message" className="text-right">
-              رسالتك
+          <div className="space-y-2">
+            <Label htmlFor="message">
+              {areConnected ? 'رسالتك' : 'رسالة الطلب'}
             </Label>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="col-span-3"
               placeholder="اكتب رسالتك هنا..."
             />
           </div>
