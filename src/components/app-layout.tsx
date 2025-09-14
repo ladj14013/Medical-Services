@@ -12,6 +12,8 @@ import {
   ChevronUp,
   ChevronDown,
   LogOut,
+  MessageSquare,
+  Home,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -43,7 +45,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { currentUser } from '@/lib/data';
+import { currentUser, doctors as allDoctors } from '@/lib/data';
 import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
@@ -123,34 +125,61 @@ function AppLayoutContent({
   const pathname = usePathname();
   // In a real app, this would be based on a proper auth session
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<'patient' | 'doctor' | 'admin' | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const [isRegisterAsDialogOpen, setIsRegisterAsDialogOpen] = useState(false);
 
-
   useEffect(() => {
-    // This is a simple way to persist auth state across navigation
-    // In a real app, you'd use a more robust solution (e.g., JWT in localStorage)
-    const authStatus = sessionStorage.getItem('isAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
     setIsClient(true);
-  }, []);
+    const authStatus = sessionStorage.getItem('isAuthenticated');
+    const role = sessionStorage.getItem('userRole') as 'patient' | 'doctor' | 'admin' | null;
+
+    if (authStatus === 'true' && role) {
+      setIsAuthenticated(true);
+      setUserRole(role);
+    }
+
+    // This is a prototype-specific hack to set role based on URL
+    if (authStatus === 'true') {
+        if (pathname.startsWith('/dashboard/doctor') || pathname.startsWith('/forum')) {
+            setUserRole('doctor');
+            sessionStorage.setItem('userRole', 'doctor');
+        } else if (pathname.startsWith('/dashboard/patient') || pathname.startsWith('/profile')) {
+            setUserRole('patient');
+            sessionStorage.setItem('userRole', 'patient');
+        } else if (pathname.startsWith('/dashboard')) {
+             setUserRole('admin');
+            sessionStorage.setItem('userRole', 'admin');
+        }
+    }
+
+  }, [pathname]);
 
   useEffect(() => {
-    // This will run when the login page redirects
-    if (pathname === '/dashboard/patient' && !isAuthenticated) {
-        sessionStorage.setItem('isAuthenticated', 'true');
-        setIsAuthenticated(true);
+    if (pathname.startsWith('/login')) {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      if (role) {
+        sessionStorage.setItem('loginRole', role);
+      }
     }
-  }, [pathname, isAuthenticated]);
 
+    if (pathname === '/dashboard/patient' || pathname === '/dashboard/doctor' || pathname === '/dashboard') {
+        const authSet = sessionStorage.getItem('isAuthenticated');
+        if (!authSet) {
+             sessionStorage.setItem('isAuthenticated', 'true');
+             setIsAuthenticated(true);
+        }
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('loginRole');
     setIsAuthenticated(false);
-    // Redirect to home page after logout
+    setUserRole(null);
     if (typeof window !== 'undefined') {
         window.location.href = '/';
     }
@@ -160,6 +189,10 @@ function AppLayoutContent({
   const isLoginPage = pathname.startsWith('/login');
   const isRegisterPage = pathname.startsWith('/register');
   
+  const loggedInUser = userRole === 'doctor' 
+    ? (allDoctors.find(d => d.id === '1') || { name: 'Doctor' }) 
+    : currentUser;
+
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
         <div className="flex items-center gap-4">
@@ -172,7 +205,7 @@ function AppLayoutContent({
           {isClient && isAuthenticated ? (
             <>
                 <span className="text-sm text-muted-foreground hidden sm:inline">
-                    مرحباً بعودتك، {currentUser.name}!
+                    مرحباً بعودتك، {loggedInUser.name}!
                 </span>
 
               <Popover>
@@ -231,7 +264,7 @@ function AppLayoutContent({
                           data-ai-hint={userAvatar.imageHint}
                         />
                       )}
-                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{loggedInUser.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -239,11 +272,11 @@ function AppLayoutContent({
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {currentUser.name}
+                        {loggedInUser.name}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {currentUser.email}
-                      </p>
+                       { 'email' in loggedInUser && <p className="text-xs leading-none text-muted-foreground">
+                        {loggedInUser.email}
+                      </p>}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -252,11 +285,16 @@ function AppLayoutContent({
                       ملفي الشخصي
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                   { userRole === 'patient' && <DropdownMenuItem>
                     <Link href="/dashboard/patient" className="w-full">
                       المواعيد
                     </Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> }
+                   { userRole === 'doctor' && <DropdownMenuItem>
+                    <Link href="/dashboard/doctor" className="w-full">
+                      لوحة التحكم
+                    </Link>
+                  </DropdownMenuItem> }
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="ml-2 h-4 w-4" />
@@ -289,19 +327,39 @@ function AppLayoutContent({
     </footer>
   );
   
-  const authenticatedMenu = [
+  const patientMenu = [
+    { id: 'home', href: '/', label: 'الرئيسية', icon: Home },
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
     { id: 'appointments', href: '/dashboard/patient', label: 'مواعيــدي', icon: LayoutGrid },
     { id: 'profile', href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
   ];
+  
+  const doctorMenu = [
+    { id: 'dashboard', href: '/dashboard/doctor', label: 'لوحة التحكم', icon: LayoutGrid },
+    { id: 'forum', href: '/forum', label: 'المنتدى', icon: MessageSquare },
+    { id: 'profile', href: '/profile', label: 'ملفي الشخصي', icon: UserIcon },
+    { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
+  ];
 
   const unauthenticatedMenu = [
+    { id: 'home', href: '/', label: 'الرئيسية', icon: Home },
     { id: 'search', label: 'البحث عن طبيب', icon: Search, action: () => setIsSearchDialogOpen(true) },
     { id: 'login', href: '/login', label: 'تسجيل الدخول', icon: LogIn },
     { id: 'register', label: 'إنشاء حساب', icon: UserPlus, action: () => setIsRegisterAsDialogOpen(true) },
   ];
 
-  const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
+  const getMenuItems = () => {
+    if (isAuthenticated) {
+        switch(userRole) {
+            case 'doctor': return doctorMenu;
+            case 'patient': return patientMenu;
+            default: return patientMenu; // Default authenticated view
+        }
+    }
+    return unauthenticatedMenu;
+  }
+
+  const currentMenuItems = getMenuItems();
   const sidebarCollapsible = (isHomePage && !isAuthenticated) ? 'none' : (isHomePage ? 'none' : 'icon');
   
   const homePageUnauthenticated = (

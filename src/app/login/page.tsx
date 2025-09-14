@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,28 +11,40 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+
     // In a real app, you'd validate credentials here.
-    // For this prototype, we'll just simulate a successful login.
+    const role = searchParams.get('role') || 'patient';
+    
+    sessionStorage.setItem('isAuthenticated', 'true');
+    sessionStorage.setItem('userRole', role);
+
     toast({
       title: 'تم تسجيل الدخول بنجاح',
       description: 'مرحباً بعودتك!',
     });
-    // This is where you would set the auth state.
-    // For now, we redirect to the authenticated part of the app.
-    router.push('/dashboard/patient');
+
+    // Redirect to the correct dashboard based on role
+    if (role === 'doctor') {
+      router.push('/dashboard/doctor');
+    } else if (role === 'admin') {
+      router.push('/dashboard');
+    } else {
+      router.push('/dashboard/patient');
+    }
   };
 
   return (
@@ -75,7 +87,7 @@ export default function LoginPage() {
             </Button>
              <div className="text-center">
                 <Button variant="link" size="sm" asChild>
-                    <Link href="/register/patient">
+                    <Link href="/register">
                         ليس لديك حساب؟ إنشاء حساب جديد
                     </Link>
                 </Button>

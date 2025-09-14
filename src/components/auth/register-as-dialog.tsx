@@ -59,6 +59,9 @@ export default function RegisterAsDialog({
             <span className="font-semibold">التسجيل كطبيب</span>
           </Button>
         </div>
+         <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground">هل أنت مسؤول؟ <Button variant="link" onClick={() => { setIsOpen(false); router.push('/login?role=admin'); }}>سجل الدخول من هنا</Button></p>
+        </div>
       </DialogContent>
     </Dialog>
   );

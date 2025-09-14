@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { forumPosts } from '@/lib/data';
-import { Edit, MessageSquare, Plus, User } from 'lucide-react';
+import { Edit, MessageSquare, Plus, User, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
@@ -63,8 +63,8 @@ export default function ForumPage() {
                     {post.comments.length} تعليقات
                 </div>
                 <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/forum/post/${post.id}`}>
-                        عرض المناقشة <ArrowRight className="mr-2 h-4 w-4" />
+                    <Link href={`/forum/post/${post.id}`} className="flex items-center gap-2">
+                        عرض المناقشة <ArrowRight className="h-4 w-4" />
                     </Link>
                 </Button>
               </CardFooter>
@@ -75,8 +75,3 @@ export default function ForumPage() {
     </AppLayout>
   );
 }
-
-// Dummy ArrowRight component as it's used in the code
-const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-)

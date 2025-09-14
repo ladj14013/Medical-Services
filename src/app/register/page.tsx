@@ -28,6 +28,10 @@ export default function RegisterPage() {
     e.preventDefault();
     // In a real app, you'd create a user account here.
     // For this prototype, we'll just simulate a successful registration.
+    
+    sessionStorage.setItem('isAuthenticated', 'true');
+    sessionStorage.setItem('userRole', 'patient');
+    
     toast({
       title: 'تم إنشاء الحساب بنجاح',
       description: 'مرحباً بك! سيتم توجيهك إلى لوحة التحكم.',
