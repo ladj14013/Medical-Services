@@ -12,6 +12,7 @@ import {
   User as UserIcon,
   ChevronUp,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -26,6 +27,7 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +49,7 @@ import Logo from '@/components/logo';
 import data from '@/lib/placeholder-images.json';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const userAvatar = data.placeholderImages.find(
@@ -120,6 +122,20 @@ function AppLayoutContent({
   const pathname = usePathname();
   // In a real app, this would be based on a proper auth session
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    // Redirect to home page after logout
+    if (typeof window !== 'undefined') {
+        window.location.href = '/';
+    }
+  };
 
   const isHomePage = pathname === '/';
   
@@ -132,7 +148,7 @@ function AppLayoutContent({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {isAuthenticated ? (
+          {isClient && isAuthenticated ? (
             <>
               <Popover>
                 <PopoverTrigger asChild>
@@ -217,12 +233,15 @@ function AppLayoutContent({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsAuthenticated(false)}>تسجيل الخروج</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="ml-2 h-4 w-4" />
+                    تسجيل الخروج
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
-             <div className="flex items-center gap-2">
+             isClient && <div className="flex items-center gap-2">
                <Button variant="outline" onClick={() => setIsAuthenticated(true)}>تسجيل الدخول</Button>
                <Button>إنشاء حساب</Button>
              </div>
@@ -244,20 +263,6 @@ function AppLayoutContent({
         © {new Date().getFullYear()} Medical Services. كل الحقوق محفوظة.
     </footer>
   );
-
-  const homePageUnauthenticated = (
-    <div className="flex min-h-screen w-full flex-col">
-      {header}
-      <TopAdBanner />
-      {mainContent}
-      {adFooter}
-      {appFooter}
-    </div>
-  );
-
-  if (isHomePage && !isAuthenticated) {
-    return homePageUnauthenticated;
-  }
   
   const authenticatedMenu = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
@@ -274,8 +279,25 @@ function AppLayoutContent({
   const currentMenuItems = isAuthenticated ? authenticatedMenu : unauthenticatedMenu;
   const sidebarCollapsible = (isHomePage && !isAuthenticated) ? 'none' : (isHomePage ? 'none' : 'icon');
   
+  const homePageUnauthenticated = (
+    <div className="flex min-h-screen w-full flex-col">
+      {header}
+      <TopAdBanner />
+      {mainContent}
+      {adFooter}
+      {appFooter}
+    </div>
+  );
+
+  if (isClient && isHomePage && !isAuthenticated) {
+    return homePageUnauthenticated;
+  }
+  
+  if (!isClient) {
+    return null;
+  }
+
   return (
-    <SidebarProvider>
       <Sidebar side="right" collapsible={sidebarCollapsible}>
         <SidebarHeader>
           <Logo />
@@ -317,7 +339,6 @@ function AppLayoutContent({
         {adFooter}
         {appFooter}
       </SidebarInset>
-    </SidebarProvider>
   );
 }
 
