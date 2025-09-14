@@ -125,11 +125,26 @@ function AppLayoutContent({
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // This is a simple way to persist auth state across navigation
+    // In a real app, you'd use a more robust solution (e.g., JWT in localStorage)
+    const authStatus = sessionStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    // This will run when the login page redirects
+    if (pathname === '/dashboard/patient' && !isAuthenticated) {
+        sessionStorage.setItem('isAuthenticated', 'true');
+        setIsAuthenticated(true);
+    }
+  }, [pathname, isAuthenticated]);
+
 
   const handleLogout = () => {
+    sessionStorage.removeItem('isAuthenticated');
     setIsAuthenticated(false);
     // Redirect to home page after logout
     if (typeof window !== 'undefined') {
@@ -138,6 +153,7 @@ function AppLayoutContent({
   };
 
   const isHomePage = pathname === '/';
+  const isLoginPage = pathname === '/login';
   
   const header = (
      <header className="flex h-14 items-center justify-between border-b bg-background px-4 sm:px-8">
@@ -242,7 +258,7 @@ function AppLayoutContent({
             </>
           ) : (
              isClient && <div className="flex items-center gap-2">
-               <Button variant="outline" onClick={() => setIsAuthenticated(true)}>تسجيل الدخول</Button>
+               <Button asChild variant="outline"><Link href="/login">تسجيل الدخول</Link></Button>
                <Button>إنشاء حساب</Button>
              </div>
           )}
@@ -272,7 +288,7 @@ function AppLayoutContent({
 
   const unauthenticatedMenu = [
     { href: '/', label: 'البحث عن طبيب', icon: Search },
-    { href: '#', label: 'تسجيل الدخول', icon: LogIn, action: () => setIsAuthenticated(true) },
+    { href: '/login', label: 'تسجيل الدخول', icon: LogIn },
     { href: '#', label: 'إنشاء حساب', icon: UserPlus, action: () => {} },
   ];
 
@@ -288,6 +304,10 @@ function AppLayoutContent({
       {appFooter}
     </div>
   );
+
+  if (isLoginPage) {
+      return children; // Render only the login page content
+  }
 
   if (isClient && isHomePage && !isAuthenticated) {
     return homePageUnauthenticated;
