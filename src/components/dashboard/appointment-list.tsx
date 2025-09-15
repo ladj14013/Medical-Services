@@ -17,24 +17,30 @@ export default function AppointmentList() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // For this prototype, we'll hardcode the patient ID
+  const patientId = 'user1';
+
   useEffect(() => {
     const fetchAppointments = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch('/api/appointments?userId=user1'); // Using placeholder userId
+        // Fetch appointments for the specific patient
+        const res = await fetch(`/api/appointments?patientId=${patientId}`);
         const data = await res.json();
+
         if (Array.isArray(data)) {
           setAppointments(data);
         } else {
           setAppointments([]);
           toast({
             title: 'خطأ',
-            description: 'فشل في تحميل المواعيد.',
+            description: data.message || 'فشل في تحميل المواعيد.',
             variant: 'destructive',
           });
         }
       } catch (error) {
         console.error('Failed to fetch appointments:', error);
+        setAppointments([]);
         toast({
           title: 'خطأ',
           description: 'فشل في تحميل المواعيد.',
@@ -98,7 +104,7 @@ export default function AppointmentList() {
                     {apt.doctorSpecialization}
                   </p>
                 </div>
-                <Badge variant="secondary">قادم</Badge>
+                <Badge variant="secondary">{apt.status === 'upcoming' ? 'قادم' : apt.status}</Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -120,6 +126,7 @@ export default function AppointmentList() {
                   <Button
                     variant="destructive"
                     onClick={() => handleCancel(apt.id)}
+                    disabled={apt.status !== 'upcoming'}
                   >
                     إلغاء
                   </Button>
@@ -130,7 +137,12 @@ export default function AppointmentList() {
         ))
       ) : (
         <Card className="text-center p-10">
-          <p className="text-muted-foreground">ليس لديك مواعيد قادمة.</p>
+          <CardContent>
+             <p className="text-muted-foreground">ليس لديك مواعيد قادمة.</p>
+             <Button asChild className="mt-4">
+                 <Link href="/#search">ابحث عن طبيب واحجز الآن</Link>
+             </Button>
+          </CardContent>
         </Card>
       )}
     </div>

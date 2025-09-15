@@ -34,8 +34,6 @@ export default function BookingClient({ doctor }: BookingClientProps) {
   const { toast } = useToast();
 
   const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
-  // The availability is now just for show, as the DB is the source of truth.
-  // In a real app, this would be fetched or calculated.
   const availableTimes = doctor.availability[formattedDate] || ['09:00 ص', '10:00 ص', '11:00 ص', '02:00 م', '03:00 م', '04:00 م'];
 
   const handleBooking = async () => {
@@ -60,37 +58,38 @@ export default function BookingClient({ doctor }: BookingClientProps) {
           doctorId: doctor.id,
           doctorName: doctor.name,
           doctorSpecialization: doctor.specialization,
+          patientId: 'user1', // Hardcoded for prototype
+          patientName: 'أليكس دو', // Hardcoded for prototype
           date: format(date, 'yyyy-MM-dd'),
           time: selectedTime,
-          reason: 'فحص أولي', // Placeholder reason
+          reason: 'فحص أولي',
         }),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        // Simulate booked slot to trigger AI for specific times
-        if (selectedTime === '10:00 AM' || selectedTime === '02:00 PM') {
-            toast({
-              title: 'فشل الحجز',
-              description: 'هذا الوقت لم يعد متاحًا. نحن نبحث عن بدائل.',
-              variant: 'destructive',
-            });
-            setAiDialogOpen(true);
+        // This is a more realistic conflict simulation based on the API response.
+        if (response.status === 409) {
+          toast({
+            title: 'فشل الحجز',
+            description: responseData.message || 'هذا الوقت لم يعد متاحًا. نحن نبحث عن بدائل.',
+            variant: 'destructive',
+          });
+          setAiDialogOpen(true);
         } else {
-            throw new Error(errorData.message || 'فشل حجز الموعد.');
+          throw new Error(responseData.message || 'فشل حجز الموعد.');
         }
       } else {
         toast({
           title: 'تم حجز الموعد!',
-          description: `تم تأكيد موعدك مع ${
-            doctor.name
-          } في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
+          description: `تم تأكيد موعدك مع ${doctor.name} في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
         });
         setSelectedTime('');
       }
 
     } catch (error) {
-       if (error instanceof Error && (selectedTime !== '10:00 AM' && selectedTime !== '02:00 PM')) {
+       if (error instanceof Error) {
           toast({
             title: 'خطأ',
             description: error.message,
@@ -179,7 +178,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
               ) : (
                 <div className="flex items-center justify-center h-full p-4 border rounded-md bg-muted/50">
                   <p className="text-muted-foreground">
-                    'لا توجد أوقات متاحة في هذا التاريخ.'
+                    لا توجد أوقات متاحة في هذا التاريخ.
                   </p>
                 </div>
               )}

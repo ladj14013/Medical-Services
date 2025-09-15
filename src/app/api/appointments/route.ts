@@ -26,6 +26,7 @@ export async function GET(request: Request) {
       query += " WHERE patientId = ? ORDER BY date, time";
       params.push(patientId);
     } else {
+       // If no params, it defaults to fetching all, which is okay for the admin view
        query += " ORDER BY date, time";
     }
     
@@ -65,12 +66,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'هذا الموعد محجوز بالفعل' }, { status: 409 });
     }
     
+    // In a real app, patientId would come from the authenticated session
+    const finalPatientId = patientId || 'user1'; 
+    const finalPatientName = patientName || 'أليكس دو';
+
     const newAppointment: Appointment = {
       id: uuidv4(),
       doctorId,
-      patientId,
+      patientId: finalPatientId,
       doctorName,
-      patientName,
+      patientName: finalPatientName,
       doctorSpecialization,
       date,
       time,

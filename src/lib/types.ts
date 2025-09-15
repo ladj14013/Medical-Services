@@ -36,7 +36,6 @@ export interface User {
   phoneNumber?: string;
   medicalHistory: string;
   avatarId: string;
-  role: 'patient' | 'doctor' | 'admin';
 }
 
 export interface ForumPost {
