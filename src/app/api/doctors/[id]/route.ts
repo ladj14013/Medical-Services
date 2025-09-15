@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const connection = await db();
+    const connection = db();
     const [rows] = await connection.query("SELECT * FROM doctors WHERE id = ?", [params.id]);
     const doctors = (rows as any[]);
 
@@ -43,7 +43,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'حالة غير صالحة' }, { status: 400 });
     }
 
-    const connection = await db();
+    const connection = db();
     const query = "UPDATE doctors SET status = ? WHERE id = ?";
     await connection.query(query, [status, params.id]);
 

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const status = searchParams.get('status');
 
   try {
-    const connection = await db();
+    const connection = db();
     let query = "SELECT * FROM doctors WHERE status = 'approved'";
     
     if (status === 'all') {

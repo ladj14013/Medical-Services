@@ -1,28 +1,33 @@
 // src/lib/db.ts
 import mysql from 'mysql2/promise';
 
-// This is a simplified connection setup. In a production environment,
-// you might want to use a connection pool.
-let connection: mysql.Connection | null = null;
+// This is a more robust connection setup using a connection pool.
+// It's better for performance and scalability.
+let pool: mysql.Pool | null = null;
 
-export async function db() {
-  if (connection) {
-    return connection;
+export function db() {
+  if (pool) {
+    return pool;
   }
 
   try {
     // Read connection details from environment variables
-    connection = await mysql.createConnection({
+    pool = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      port: Number(process.env.DB_PORT)
+      port: Number(process.env.DB_PORT),
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
     });
-    console.log('Connected to MySQL database!');
-    return connection;
+    
+    console.log('Connected to MySQL database using connection pool!');
+    return pool;
+
   } catch (error) {
-    console.error('Failed to connect to the database:', error);
-    throw new Error('Database connection failed.');
+    console.error('Failed to create database pool:', error);
+    throw new Error('Database connection pool failed.');
   }
 }

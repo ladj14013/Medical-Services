@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const view = searchParams.get('view');
 
   try {
-    const connection = await db();
+    const connection = db();
     let query = "SELECT * FROM appointments";
     const params: string[] = [];
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'البيانات المطلوبة غير مكتملة' }, { status: 400 });
     }
 
-    const connection = await db();
+    const connection = db();
     
     // In a real app, you would check for availability conflicts here.
     // For now, we assume the slot is available.
