@@ -1,21 +1,34 @@
 // src/app/api/doctors/route.ts
 import { NextResponse } from 'next/server';
-import { doctors } from '@/lib/data';
-import type { Doctor } from '@/lib/types';
-
-// Simulate a database delay
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+import { db } from '@/lib/db';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
 
-  await delay(500);
+  try {
+    const connection = await db();
+    let query = "SELECT * FROM doctors WHERE status = 'approved'";
+    
+    if (status === 'all') {
+      query = "SELECT * FROM doctors";
+    }
+    
+    const [rows] = await connection.query(query);
+    
+    // In a real app, you'd have more robust JSON parsing for fields like availability, promotionalImages, etc.
+    // For now, we'll assume they are stored as JSON strings in the DB and parse them.
+    const doctors = (rows as any[]).map(doc => ({
+      ...doc,
+      availability: typeof doc.availability === 'string' ? JSON.parse(doc.availability) : doc.availability,
+      promotionalImages: typeof doc.promotionalImages === 'string' ? JSON.parse(doc.promotionalImages) : doc.promotionalImages,
+      connections: typeof doc.connections === 'string' ? JSON.parse(doc.connections) : doc.connections,
+    }));
 
-  if (status === 'all') {
     return NextResponse.json(doctors);
-  }
 
-  const approvedDoctors: Doctor[] = doctors.filter(doc => doc.status === 'approved');
-  return NextResponse.json(approvedDoctors);
+  } catch (error) {
+    console.error('DATABASE ERROR:', error);
+    return NextResponse.json({ message: 'فشل الاتصال بقاعدة البيانات' }, { status: 500 });
+  }
 }
