@@ -5,26 +5,30 @@ import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import type { Appointment } from '@/lib/types';
 
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
   const doctorId = searchParams.get('doctorId');
+  const view = searchParams.get('view');
 
   try {
     const connection = await db();
     let query = "SELECT * FROM appointments";
     const params: string[] = [];
 
-    if (doctorId) {
-      query += " WHERE doctorId = ?";
+    if (view === 'all') {
+      // No additional WHERE clause needed, returns all
+      query += " ORDER BY date, time";
+    } else if (doctorId) {
+      query += " WHERE doctorId = ? ORDER BY date, time";
       params.push(doctorId);
     } else if (userId) {
-      // In a real app with a users table and appointments linked to users,
-      // you would filter by userId. For this prototype, we'll return
-      // all appointments to simulate a user's appointments.
-       query += " WHERE doctorId IN (?, ?) ORDER BY date, time";
-       params.push('1', '3'); // Placeholder
+      // In a real app with a users table, this would be a real join.
+      // For this prototype, we'll return a sample set for 'user1'.
+      query += " WHERE doctorId IN (?, ?) ORDER BY date, time";
+      params.push('1', '3'); // Placeholder doctor IDs for the patient's appointments
+    } else {
+       query += " ORDER BY date, time";
     }
     
     const [rows] = await connection.query(query, params);
@@ -32,7 +36,7 @@ export async function GET(request: Request) {
     // Format the date correctly before sending it to the client
     const appointments = (rows as any[]).map(apt => ({
       ...apt,
-      date: format(new Date(apt.date), 'yyyy-MM-dd'),
+      date: apt.date ? format(new Date(apt.date), 'yyyy-MM-dd') : null,
     }));
     
     return NextResponse.json(appointments);
@@ -53,6 +57,8 @@ export async function POST(request: Request) {
 
     const connection = await db();
     
+    // In a real app, you would check for availability conflicts here.
+    // For now, we assume the slot is available.
     const newAppointment: Appointment = {
       id: uuidv4(),
       doctorId,

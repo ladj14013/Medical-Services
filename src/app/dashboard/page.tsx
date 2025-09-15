@@ -5,9 +5,10 @@ import AppLayout from '@/components/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Doctor } from '@/lib/types';
-import { Check, ShieldCheck, X } from 'lucide-react';
+import { Check, ShieldCheck, X, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 export default function AdminDashboardPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -49,13 +50,35 @@ export default function AdminDashboardPage() {
 
   return (
     <AppLayout>
-      <div className="flex-1 space-y-4 p-4 sm:p-8">
+      <div className="flex-1 space-y-6 p-4 sm:p-8">
         <div className="flex items-center justify-between space-y-2">
           <h1 className="text-3xl font-bold tracking-tight font-headline">
             لوحة تحكم المسؤول
           </h1>
         </div>
         
+        <Card>
+          <CardHeader>
+            <CardTitle>عرض قاعدة البيانات</CardTitle>
+            <CardDescription>
+              عرض محتويات جداول قاعدة البيانات مباشرة في التطبيق.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              استخدم هذه الميزة لمراقبة البيانات في جدولي الأطباء والمواعيد بسهولة.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild>
+              <Link href="/dashboard/database">
+                <Database className="ml-2 h-4 w-4" />
+                الانتقال إلى عارض قاعدة البيانات
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
         <Card>
             <CardHeader>
                 <CardTitle>طلبات تسجيل الأطباء</CardTitle>
