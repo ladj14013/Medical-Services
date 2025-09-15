@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 export default function RegisterDoctorPage() {
   const router = useRouter();
@@ -25,16 +26,47 @@ export default function RegisterDoctorPage() {
   const [specialization, setSpecialization] = useState('');
   const [license, setLicense] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd create a doctor account here.
-    toast({
-      title: 'تم استلام طلب التسجيل',
-      description: 'سيتم مراجعة طلبك. سيتم إعلامك عند الموافقة عليه.',
-    });
-    // For now, we redirect to the home page.
-    router.push('/');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/doctors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          password, // Note: In a real app, password should be handled securely on the backend
+          specialization,
+          licenseNumber: license,
+          // We can add more fields like phone number if the DB schema supports it.
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'فشل إرسال طلب التسجيل');
+      }
+
+      toast({
+        title: 'تم استلام طلب التسجيل',
+        description: 'سيتم مراجعة طلبك. سيتم إعلامك عند الموافقة عليه.',
+      });
+      router.push('/');
+    } catch (error) {
+      toast({
+        title: 'خطأ في التسجيل',
+        description: (error as Error).message || 'حدث خطأ غير متوقع.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -60,6 +92,7 @@ export default function RegisterDoctorPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
              <div className="space-y-2">
@@ -71,6 +104,7 @@ export default function RegisterDoctorPage() {
                 required
                 value={specialization}
                 onChange={(e) => setSpecialization(e.target.value)}
+                disabled={isLoading}
               />
             </div>
              <div className="space-y-2">
@@ -82,6 +116,7 @@ export default function RegisterDoctorPage() {
                 required
                 value={license}
                 onChange={(e) => setLicense(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -93,6 +128,7 @@ export default function RegisterDoctorPage() {
                 required
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -104,6 +140,7 @@ export default function RegisterDoctorPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -114,10 +151,12 @@ export default function RegisterDoctorPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              إرسال طلب التسجيل
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              {isLoading ? 'جاري الإرسال...' : 'إرسال طلب التسجيل'}
             </Button>
             <div className="text-center">
                 <Button variant="link" size="sm" asChild>
