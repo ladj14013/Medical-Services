@@ -26,8 +26,21 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // In a real app, you'd validate credentials here.
     const role = searchParams.get('role') || 'patient';
+    
+    // Admin credential check
+    if (role === 'admin') {
+      if (email !== 'admin@medical.app' || password !== 'admin123') {
+        toast({
+          title: 'فشل تسجيل الدخول',
+          description: 'بيانات اعتماد المسؤول غير صحيحة.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    
+    // In a real app, you'd validate other roles' credentials here.
     
     sessionStorage.setItem('isAuthenticated', 'true');
     sessionStorage.setItem('userRole', role);
@@ -70,6 +83,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -80,6 +94,7 @@ export default function LoginPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
               />
             </div>
             <Button type="submit" className="w-full">
