@@ -13,13 +13,16 @@ export interface Doctor {
   dailyAppointmentLimit?: number;
   promotionalImages?: { id: string; url: string; hint: string }[];
   connections?: string[];
+  email?: string;
 }
 
 export interface Appointment {
   id: string;
   doctorId: string;
+  patientId: string;
   doctorName: string;
   doctorSpecialization: string;
+  patientName: string;
   date: string;
   time: string;
   status: 'upcoming' | 'completed' | 'cancelled';
@@ -33,6 +36,7 @@ export interface User {
   phoneNumber?: string;
   medicalHistory: string;
   avatarId: string;
+  role: 'patient' | 'doctor' | 'admin';
 }
 
 export interface ForumPost {

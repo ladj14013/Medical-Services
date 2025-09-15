@@ -7,12 +7,12 @@ import type { Appointment } from '@/lib/types';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('userId');
+  const patientId = searchParams.get('patientId');
   const doctorId = searchParams.get('doctorId');
   const view = searchParams.get('view');
 
   try {
-    const connection = db();
+    const connection = await db();
     let query = "SELECT * FROM appointments";
     const params: string[] = [];
 
@@ -22,11 +22,9 @@ export async function GET(request: Request) {
     } else if (doctorId) {
       query += " WHERE doctorId = ? ORDER BY date, time";
       params.push(doctorId);
-    } else if (userId) {
-      // In a real app with a users table, this would be a real join.
-      // For this prototype, we'll return a sample set for 'user1'.
-      query += " WHERE doctorId IN (?, ?) ORDER BY date, time";
-      params.push('1', '3'); // Placeholder doctor IDs for the patient's appointments
+    } else if (patientId) {
+      query += " WHERE patientId = ? ORDER BY date, time";
+      params.push(patientId);
     } else {
        query += " ORDER BY date, time";
     }
@@ -49,20 +47,30 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { doctorId, doctorName, doctorSpecialization, date, time, reason } = await request.json();
+    const { doctorId, patientId, doctorName, patientName, doctorSpecialization, date, time, reason } = await request.json();
     
-    if (!doctorId || !doctorName || !doctorSpecialization || !date || !time) {
+    if (!doctorId || !patientId || !doctorName || !patientName || !doctorSpecialization || !date || !time) {
       return NextResponse.json({ message: 'البيانات المطلوبة غير مكتملة' }, { status: 400 });
     }
 
-    const connection = db();
+    const connection = await db();
     
-    // In a real app, you would check for availability conflicts here.
-    // For now, we assume the slot is available.
+    // Check for availability conflicts
+    const [existingAppointments] = await connection.query(
+      "SELECT * FROM appointments WHERE doctorId = ? AND date = ? AND time = ?",
+      [doctorId, date, time]
+    );
+
+    if ((existingAppointments as any[]).length > 0) {
+      return NextResponse.json({ message: 'هذا الموعد محجوز بالفعل' }, { status: 409 });
+    }
+    
     const newAppointment: Appointment = {
       id: uuidv4(),
       doctorId,
+      patientId,
       doctorName,
+      patientName,
       doctorSpecialization,
       date,
       time,
@@ -71,14 +79,16 @@ export async function POST(request: Request) {
     };
 
     const query = `
-      INSERT INTO appointments (id, doctorId, doctorName, doctorSpecialization, date, time, status, reason) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO appointments (id, doctorId, patientId, doctorName, patientName, doctorSpecialization, date, time, status, reason) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     await connection.query(query, [
       newAppointment.id,
       newAppointment.doctorId,
+      newAppointment.patientId,
       newAppointment.doctorName,
+      newAppointment.patientName,
       newAppointment.doctorSpecialization,
       newAppointment.date,
       newAppointment.time,
