@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { addDays, format, isBefore, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -28,14 +28,17 @@ export default function BookingClient({ doctor }: BookingClientProps) {
     new Date(Date.now() + 86400000)
   );
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
   const [isAiDialogOpen, setAiDialogOpen] = useState(false);
 
   const { toast } = useToast();
 
   const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
-  const availableTimes = doctor.availability[formattedDate] || [];
+  // The availability is now just for show, as the DB is the source of truth.
+  // In a real app, this would be fetched or calculated.
+  const availableTimes = doctor.availability[formattedDate] || ['09:00 ص', '10:00 ص', '11:00 ص', '02:00 م', '03:00 م', '04:00 م'];
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!date || !selectedTime) {
       toast({
         title: 'اختيار غير مكتمل',
@@ -44,38 +47,64 @@ export default function BookingClient({ doctor }: BookingClientProps) {
       });
       return;
     }
+    
+    setIsLoading(true);
 
-    // Simulate a booked slot to trigger AI
-    if (selectedTime === '10:00 AM' || selectedTime === '02:00 PM') {
-      toast({
-        title: 'فشل الحجز',
-        description:
-          'هذا الوقت لم يعد متاحًا. نحن نبحث عن بدائل.',
-        variant: 'destructive',
+    try {
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          doctorId: doctor.id,
+          doctorName: doctor.name,
+          doctorSpecialization: doctor.specialization,
+          date: format(date, 'yyyy-MM-dd'),
+          time: selectedTime,
+          reason: 'فحص أولي', // Placeholder reason
+        }),
       });
-      setAiDialogOpen(true);
-    } else {
-      toast({
-        title: 'تم حجز الموعد!',
-        description: `تم تأكيد موعدك مع ${
-          doctor.name
-        } في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
-      });
-      // Here you would typically update the backend
-      setSelectedTime('');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        // Simulate booked slot to trigger AI for specific times
+        if (selectedTime === '10:00 AM' || selectedTime === '02:00 PM') {
+            toast({
+              title: 'فشل الحجز',
+              description: 'هذا الوقت لم يعد متاحًا. نحن نبحث عن بدائل.',
+              variant: 'destructive',
+            });
+            setAiDialogOpen(true);
+        } else {
+            throw new Error(errorData.message || 'فشل حجز الموعد.');
+        }
+      } else {
+        toast({
+          title: 'تم حجز الموعد!',
+          description: `تم تأكيد موعدك مع ${
+            doctor.name
+          } في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
+        });
+        setSelectedTime('');
+      }
+
+    } catch (error) {
+       if (error instanceof Error && (selectedTime !== '10:00 AM' && selectedTime !== '02:00 PM')) {
+          toast({
+            title: 'خطأ',
+            description: error.message,
+            variant: 'destructive',
+          });
+       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const isDayDisabled = (day: Date): boolean => {
     if (isBefore(day, new Date()) && !isSameDay(day, new Date())) {
       return true;
-    }
-    if (doctor.dailyAppointmentLimit) {
-      const dayFormatted = format(day, 'yyyy-MM-dd');
-      const bookedCount = doctor.availability[dayFormatted]?.length || 0;
-      if (bookedCount >= doctor.dailyAppointmentLimit) {
-        return true;
-      }
     }
     return false;
   };
@@ -150,7 +179,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
               ) : (
                 <div className="flex items-center justify-center h-full p-4 border rounded-md bg-muted/50">
                   <p className="text-muted-foreground">
-                    {date && isDayDisabled(date) ? 'اليوم ممتلئ. الرجاء اختيار يوم آخر.' : 'لا توجد أوقات متاحة في هذا التاريخ.'}
+                    'لا توجد أوقات متاحة في هذا التاريخ.'
                   </p>
                 </div>
               )}
@@ -158,10 +187,11 @@ export default function BookingClient({ doctor }: BookingClientProps) {
           </div>
           <Button
             onClick={handleBooking}
-            disabled={!date || !selectedTime}
+            disabled={!date || !selectedTime || isLoading}
             className="w-full text-lg py-6"
           >
-            تأكيد الحجز
+            {isLoading && <Loader2 className="ml-2 h-5 w-5 animate-spin" />}
+            {isLoading ? 'جاري الحجز...' : 'تأكيد الحجز'}
           </Button>
         </CardContent>
       </Card>
