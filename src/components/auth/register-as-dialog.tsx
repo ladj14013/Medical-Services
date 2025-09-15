@@ -32,6 +32,11 @@ export default function RegisterAsDialog({
     router.push('/register/doctor');
   };
 
+  const handleAdminLogin = () => {
+    setIsOpen(false);
+    router.push('/login?role=admin');
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -60,7 +65,7 @@ export default function RegisterAsDialog({
           </Button>
         </div>
          <div className="text-center pt-2">
-            <p className="text-sm text-muted-foreground">هل أنت مسؤول؟ <Button variant="link" onClick={() => { setIsOpen(false); router.push('/login?role=admin'); }}>سجل الدخول من هنا</Button></p>
+            <p className="text-sm text-muted-foreground">هل أنت مسؤول؟ <Button variant="link" onClick={handleAdminLogin}>سجل الدخول من هنا</Button></p>
         </div>
       </DialogContent>
     </Dialog>

@@ -22,11 +22,11 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  const role = searchParams.get('role') || 'patient';
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const role = searchParams.get('role') || 'patient';
     
     // Admin credential check
     if (role === 'admin') {
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline">تسجيل الدخول</CardTitle>
           <CardDescription>
-            أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.
+            {role === 'admin' ? 'الرجاء إدخال بيانات اعتماد المسؤول.' : 'أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
