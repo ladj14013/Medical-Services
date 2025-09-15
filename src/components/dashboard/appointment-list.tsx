@@ -23,7 +23,16 @@ export default function AppointmentList() {
       try {
         const res = await fetch('/api/appointments?userId=user1'); // Using placeholder userId
         const data = await res.json();
-        setAppointments(data);
+        if (Array.isArray(data)) {
+          setAppointments(data);
+        } else {
+          setAppointments([]);
+          toast({
+            title: 'خطأ',
+            description: 'فشل في تحميل المواعيد.',
+            variant: 'destructive',
+          });
+        }
       } catch (error) {
         console.error('Failed to fetch appointments:', error);
         toast({
@@ -51,9 +60,9 @@ export default function AppointmentList() {
     });
   };
 
-  const upcomingAppointments = appointments.filter(
-    (apt) => apt.status === 'upcoming'
-  );
+  const upcomingAppointments = Array.isArray(appointments) 
+    ? appointments.filter((apt) => apt.status === 'upcoming')
+    : [];
 
   if (isLoading) {
     return (
