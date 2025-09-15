@@ -15,7 +15,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import type { Doctor } from '@/lib/types';
-import { doctors as staticDoctors } from '@/lib/data';
+import { getStaticDoctor } from '@/app/api/doctors/[id]/route';
 
 async function getDoctor(id: string): Promise<Doctor | null> {
   try {
@@ -137,8 +137,11 @@ export default async function DoctorProfilePage({
 }
 
 export async function generateStaticParams() {
-  // Use the static data for generating params as it's cheap
-  return staticDoctors.map((doctor) => ({
-    id: doctor.id,
+  const doctors = await Promise.all(
+    ['1', '2', '3', '4', '5', '6'].map(id => getStaticDoctor(id))
+  );
+
+  return doctors.filter(Boolean).map((doctor) => ({
+    id: doctor!.id,
   }));
 }

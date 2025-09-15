@@ -15,35 +15,60 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch('/api/doctors?status=all'); // A new param to fetch all doctors
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setDoctors(data);
-        } else {
-          setDoctors([]);
-          console.error("Failed to fetch doctors, API did not return an array:", data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch doctors:", error);
+  const fetchDoctors = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/doctors?status=all'); // A new param to fetch all doctors
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setDoctors(data);
+      } else {
         setDoctors([]);
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to fetch doctors, API did not return an array:", data);
+        toast({ title: 'خطأ في تحميل الأطباء', description: data.message || 'حدث خطأ غير متوقع.', variant: 'destructive' });
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch doctors:", error);
+      setDoctors([]);
+      toast({ title: 'خطأ في الاتصال', description: 'فشل الاتصال بالخادم لجلب بيانات الأطباء.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDoctors();
   }, []);
 
-  const handleApproval = (id: string, newStatus: 'approved' | 'rejected') => {
-    // In a real app, this would be a PATCH request to an API
-    setDoctors(doctors.map(doc => doc.id === id ? { ...doc, status: newStatus } : doc));
-    toast({
-        title: newStatus === 'approved' ? 'تمت الموافقة على الطبيب' : 'تم رفض الطبيب',
-        description: `تم تحديث حالة الطبيب بنجاح.`,
-    });
+  const handleApproval = async (id: string, newStatus: 'approved' | 'rejected') => {
+    try {
+      const response = await fetch(`/api/doctors/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('فشل تحديث حالة الطبيب');
+      }
+      
+      // Update state locally for immediate UI feedback
+      setDoctors(doctors.map(doc => doc.id === id ? { ...doc, status: newStatus } : doc));
+      
+      toast({
+          title: newStatus === 'approved' ? 'تمت الموافقة على الطبيب' : 'تم رفض الطبيب',
+          description: `تم تحديث حالة الطبيب بنجاح.`,
+      });
+      // Optional: you can re-fetch all doctors to ensure data consistency
+      // fetchDoctors(); 
+    } catch (error) {
+      console.error('Approval error:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل تحديث حالة الطبيب في قاعدة البيانات.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const pendingDoctors = Array.isArray(doctors) ? doctors.filter(doc => doc.status === 'pending') : [];
