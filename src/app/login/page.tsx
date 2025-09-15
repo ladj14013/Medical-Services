@@ -51,10 +51,10 @@ export default function LoginPage() {
     });
 
     // Redirect to the correct dashboard based on role
-    if (role === 'doctor') {
-      router.push('/dashboard/doctor');
-    } else if (role === 'admin') {
+    if (role === 'admin') {
       router.push('/dashboard');
+    } else if (role === 'doctor') {
+      router.push('/dashboard/doctor');
     } else {
       router.push('/dashboard/patient');
     }
