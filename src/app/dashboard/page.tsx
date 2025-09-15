@@ -20,9 +20,15 @@ export default function AdminDashboardPage() {
       try {
         const res = await fetch('/api/doctors?status=all'); // A new param to fetch all doctors
         const data = await res.json();
-        setDoctors(data);
+        if (Array.isArray(data)) {
+          setDoctors(data);
+        } else {
+          setDoctors([]);
+          console.error("Failed to fetch doctors, API did not return an array:", data);
+        }
       } catch (error) {
         console.error("Failed to fetch doctors:", error);
+        setDoctors([]);
       } finally {
         setIsLoading(false);
       }
@@ -39,7 +45,7 @@ export default function AdminDashboardPage() {
     });
   };
 
-  const pendingDoctors = doctors.filter(doc => doc.status === 'pending');
+  const pendingDoctors = Array.isArray(doctors) ? doctors.filter(doc => doc.status === 'pending') : [];
 
   return (
     <AppLayout>
