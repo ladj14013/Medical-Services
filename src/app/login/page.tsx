@@ -28,8 +28,6 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, you'd validate credentials against a database for all roles.
-    
     // --- Corrected Login Logic ---
     if (role === 'admin') {
       if (email === 'admin@medical.app' && password === 'admin123') {
