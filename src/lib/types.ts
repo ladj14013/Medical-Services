@@ -14,6 +14,7 @@ export interface Doctor {
   promotionalImages?: { id: string; url: string; hint: string }[];
   connections?: string[];
   email?: string;
+  phoneNumber?: string;
 }
 
 export interface Appointment {

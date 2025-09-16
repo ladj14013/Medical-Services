@@ -43,7 +43,7 @@ export default function RegisterDoctorPage() {
           password, // Note: In a real app, password should be handled securely on the backend
           specialization,
           licenseNumber: license,
-          // We can add more fields like phone number if the DB schema supports it.
+          phoneNumber: phoneNumber
         }),
       });
 

@@ -28,35 +28,34 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Admin credential check
+    // In a real app, you'd validate credentials against a database for all roles.
+    
+    // --- Corrected Login Logic ---
     if (role === 'admin') {
-      if (email !== 'admin@medical.app' || password !== 'admin123') {
+      if (email === 'admin@medical.app' && password === 'admin123') {
+        sessionStorage.setItem('isAuthenticated', 'true');
+        sessionStorage.setItem('userRole', 'admin');
+        toast({ title: 'تم تسجيل الدخول كمسؤول' });
+        router.push('/dashboard');
+      } else {
         toast({
           title: 'فشل تسجيل الدخول',
           description: 'بيانات اعتماد المسؤول غير صحيحة.',
           variant: 'destructive',
         });
-        return; // Stop execution if admin credentials are wrong
       }
-    }
-    
-    // In a real app, you'd validate other roles' credentials against a database.
-    
-    sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userRole', role);
-
-    toast({
-      title: 'تم تسجيل الدخول بنجاح',
-      description: 'مرحباً بعودتك!',
-    });
-
-    // --- Corrected Redirect Logic ---
-    if (role === 'admin') {
-      router.push('/dashboard');
     } else if (role === 'doctor') {
-      router.push('/dashboard/doctor');
+        // This is a placeholder for real doctor authentication
+        sessionStorage.setItem('isAuthenticated', 'true');
+        sessionStorage.setItem('userRole', 'doctor');
+        toast({ title: 'تم تسجيل الدخول كطبيب' });
+        router.push('/dashboard/doctor');
     } else {
-      router.push('/dashboard/patient');
+        // This is a placeholder for real patient authentication
+        sessionStorage.setItem('isAuthenticated', 'true');
+        sessionStorage.setItem('userRole', 'patient');
+        toast({ title: 'تم تسجيل الدخول كمريض' });
+        router.push('/dashboard/patient');
     }
   };
 

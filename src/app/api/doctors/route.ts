@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const status = searchParams.get('status');
 
   try {
-    const connection = db();
+    const connection = await db();
     let query = "SELECT * FROM doctors WHERE status = 'approved'";
     
     if (status === 'all') {
@@ -39,13 +39,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { name, specialization, licenseNumber, email, location, bio, imageId } = await request.json();
+    const { name, specialization, licenseNumber, email, location, bio, imageId, phoneNumber } = await request.json();
 
     if (!name || !specialization || !licenseNumber || !email) {
       return NextResponse.json({ message: 'البيانات المطلوبة غير مكتملة' }, { status: 400 });
     }
 
-    const connection = db();
+    const connection = await db();
 
     const newDoctor = {
       id: uuidv4(),
@@ -53,6 +53,7 @@ export async function POST(request: Request) {
       specialization,
       licenseNumber,
       email,
+      phoneNumber: phoneNumber || 'غير محدد',
       location: location || 'غير محدد',
       bio: bio || 'نبذة تعريفية قيد التحديث.',
       imageId: imageId || `doctor-${Math.floor(Math.random() * 6) + 1}`, // Placeholder
@@ -63,8 +64,8 @@ export async function POST(request: Request) {
     };
 
     const query = `
-      INSERT INTO doctors (id, name, specialization, licenseNumber, email, location, bio, imageId, status, availability, promotionalImages, connections) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO doctors (id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     await connection.query(query, [
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
       newDoctor.specialization,
       newDoctor.licenseNumber,
       newDoctor.email,
+      newDoctor.phoneNumber,
       newDoctor.location,
       newDoctor.bio,
       newDoctor.imageId,
