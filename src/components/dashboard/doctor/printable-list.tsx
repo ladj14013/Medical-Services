@@ -44,8 +44,8 @@ export default function PrintableList({ appointments, doctor, date, patient }: P
                         {appointments.map((apt, index) => (
                             <tr key={apt.id} className="border-b">
                                 <td className="p-2 border">{index + 1}</td>
-                                <td className="p-2 border">{patient.name}</td> {/* Placeholder */}
-                                <td className="p-2 border">{patient.phoneNumber}</td> {/* Placeholder */}
+                                <td className="p-2 border">{apt.patientName}</td>
+                                <td className="p-2 border">{patient.phoneNumber}</td> {/* This is still a placeholder */}
                                 <td className="p-2 border">{apt.reason || 'غير محدد'}</td>
                                 <td className="p-2 border">{apt.time}</td>
                             </tr>

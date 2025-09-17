@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '@/components/app-layout';
-import { notFound } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, Users, Printer } from 'lucide-react';
 import AppointmentView from '@/components/dashboard/doctor/appointment-view';
@@ -12,25 +12,34 @@ import { Calendar } from '@/components/ui/calendar';
 import PrintableList from '@/components/dashboard/doctor/printable-list';
 import type { Appointment, Doctor, User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 export default function DoctorDashboardPage() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [patient, setPatient] = useState<User | null>(null);
+  const [appointments, setAppointments] =useState<Appointment[]>([]);
+  const [patient, setPatient] = useState<User | null>(null); // This needs to be an array of patients in a real app
   const [isLoading, setIsLoading] = useState(true);
   const [printDate, setPrintDate] = useState<Date | undefined>(new Date());
-  
-  // For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
-  const loggedInDoctorId = '1';
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
+      const userJson = sessionStorage.getItem('loggedInUser');
+      const userRole = sessionStorage.getItem('userRole');
+
+      if (!userJson || userRole !== 'doctor') {
+        router.push('/login?role=doctor');
+        return;
+      }
+      
+      const loggedInDoctor: Doctor = JSON.parse(userJson);
+
       try {
         const [doctorRes, appointmentsRes, patientRes] = await Promise.all([
-          fetch(`/api/doctors/${loggedInDoctorId}`),
-          fetch(`/api/appointments?doctorId=${loggedInDoctorId}`),
-          fetch('/api/users/user1') // Fetching the default patient user
+          fetch(`/api/doctors/${loggedInDoctor.id}`),
+          fetch(`/api/appointments?doctorId=${loggedInDoctor.id}`),
+          fetch('/api/users/user1') // Fetching a default patient user for now
         ]);
         
         if (!doctorRes.ok) throw new Error('Doctor not found');
@@ -38,8 +47,11 @@ export default function DoctorDashboardPage() {
         const doctorData = await doctorRes.json();
         const appointmentsData = await appointmentsRes.json();
         const patientData = await patientRes.json();
-
-        if (doctorData.status !== 'approved') throw new Error('Doctor not approved');
+        
+        if (doctorData.status !== 'approved') {
+             router.push('/login?role=doctor');
+             return;
+        }
 
         setDoctor(doctorData);
         setAppointments(appointmentsData);
@@ -47,16 +59,15 @@ export default function DoctorDashboardPage() {
 
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
-        // Handle not found or not approved cases
-        notFound();
+        router.push('/login?role=doctor');
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, []);
+  }, [router]);
 
-  if (isLoading || !doctor || !patient) {
+  if (isLoading || !doctor) {
     return (
       <AppLayout>
         <div className="flex-1 space-y-4 p-4 sm:p-8">
@@ -77,7 +88,16 @@ export default function DoctorDashboardPage() {
       </AppLayout>
     );
   }
-  
+    
+  if (!patient) {
+    // This is a fallback if patient data fails, can be improved
+     return (
+        <AppLayout>
+            <div className="p-8">جاري تحميل بيانات المرضى...</div>
+        </AppLayout>
+     );
+  }
+
   const today = new Date();
   const todayFormatted = format(today, 'yyyy-MM-dd');
 
@@ -109,7 +129,7 @@ export default function DoctorDashboardPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 no-print">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 no-print">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">مواعيد اليوم</CardTitle>
@@ -128,6 +148,17 @@ export default function DoctorDashboardPage() {
                 <CardContent>
                     <div className="text-2xl font-bold">{upcomingAppointments.length}</div>
                     <p className="text-xs text-muted-foreground">في الأيام القادمة.</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">الانتقال إلى المنتدى</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild>
+                        <Link href="/forum">الذهاب إلى المنتدى</Link>
+                    </Button>
+                     <p className="text-xs text-muted-foreground mt-2">تواصل وناقش مع زملائك.</p>
                 </CardContent>
             </Card>
         </div>
@@ -154,7 +185,7 @@ export default function DoctorDashboardPage() {
                         <div className="space-y-2">
                             {appointmentsForPrintDate.map(apt => (
                                 <div key={apt.id} className="text-sm p-2 bg-muted/50 rounded-md">
-                                    {apt.time} - {patient.name}
+                                    {apt.time} - {apt.patientName}
                                 </div>
                             ))}
                         </div>

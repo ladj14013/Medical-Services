@@ -56,7 +56,7 @@ export default function AppointmentView({ initialAppointments, patient }: Appoin
                         <div className='flex-1'>
                              <p className="flex items-center gap-2 font-semibold">
                                 <UserIcon className="w-5 h-5 text-primary" />
-                                {patient.name} {/* In a real app, this would be the actual patient's name */}
+                                {apt.patientName}
                             </p>
                              <p className="text-sm text-muted-foreground mt-1">
                                 السبب: {apt.reason || 'غير محدد'}
