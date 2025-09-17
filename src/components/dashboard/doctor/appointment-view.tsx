@@ -22,10 +22,10 @@ import {
 
 interface AppointmentViewProps {
   initialAppointments: Appointment[];
-  patient: User; // In a real app, you'd get the specific patient for each appointment
+  patients: User[];
 }
 
-export default function AppointmentView({ initialAppointments, patient }: AppointmentViewProps) {
+export default function AppointmentView({ initialAppointments, patients }: AppointmentViewProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const { toast } = useToast();
 
@@ -65,7 +65,7 @@ export default function AppointmentView({ initialAppointments, patient }: Appoin
                         <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
                             <div className="flex items-center gap-2 text-sm">
                                 <Calendar className="w-4 h-4" />
-                                <span>{format(new Date(apt.date), 'd MMMM yyyy', { locale: ar })}</span>
+                                <span>{apt.date ? format(new Date(apt.date), 'd MMMM yyyy', { locale: ar }) : 'غير محدد'}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                                 <Clock className="w-4 h-4" />

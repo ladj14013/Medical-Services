@@ -14,10 +14,18 @@ import type { Appointment, Doctor, User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
+// Helper function to fetch multiple users
+async function fetchPatients(patientIds: string[]): Promise<User[]> {
+    const uniquePatientIds = [...new Set(patientIds)];
+    const patientPromises = uniquePatientIds.map(id => fetch(`/api/users/${id}`).then(res => res.json()));
+    const patients = await Promise.all(patientPromises);
+    return patients.filter(p => p && !p.message); // Filter out any errors or not found
+}
+
 export default function DoctorDashboardPage() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [appointments, setAppointments] =useState<Appointment[]>([]);
-  const [patient, setPatient] = useState<User | null>(null); // This needs to be an array of patients in a real app
+  const [patients, setPatients] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [printDate, setPrintDate] = useState<Date | undefined>(new Date());
   const router = useRouter();
@@ -36,17 +44,15 @@ export default function DoctorDashboardPage() {
       const loggedInDoctor: Doctor = JSON.parse(userJson);
 
       try {
-        const [doctorRes, appointmentsRes, patientRes] = await Promise.all([
+        const [doctorRes, appointmentsRes] = await Promise.all([
           fetch(`/api/doctors/${loggedInDoctor.id}`),
           fetch(`/api/appointments?doctorId=${loggedInDoctor.id}`),
-          fetch('/api/users/user1') // Fetching a default patient user for now
         ]);
         
         if (!doctorRes.ok) throw new Error('Doctor not found');
 
         const doctorData = await doctorRes.json();
-        const appointmentsData = await appointmentsRes.json();
-        const patientData = await patientRes.json();
+        const appointmentsData: Appointment[] = await appointmentsRes.json();
         
         if (doctorData.status !== 'approved') {
              router.push('/login?role=doctor');
@@ -55,7 +61,12 @@ export default function DoctorDashboardPage() {
 
         setDoctor(doctorData);
         setAppointments(appointmentsData);
-        setPatient(patientData);
+
+        if (appointmentsData.length > 0) {
+            const patientIds = appointmentsData.map(apt => apt.patientId);
+            const fetchedPatients = await fetchPatients(patientIds);
+            setPatients(fetchedPatients);
+        }
 
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -89,7 +100,7 @@ export default function DoctorDashboardPage() {
     );
   }
     
-  if (!patient) {
+  if (!patients) {
     // This is a fallback if patient data fails, can be improved
      return (
         <AppLayout>
@@ -163,7 +174,7 @@ export default function DoctorDashboardPage() {
             </Card>
         </div>
 
-        <AppointmentView initialAppointments={upcomingAppointments} patient={patient} />
+        <AppointmentView initialAppointments={upcomingAppointments} patients={patients} />
         
         <Card className="no-print">
             <CardHeader>
@@ -205,7 +216,7 @@ export default function DoctorDashboardPage() {
         appointments={appointmentsForPrintDate}
         doctor={doctor}
         date={printDate}
-        patient={patient}
+        patients={patients}
       />
     </AppLayout>
   );

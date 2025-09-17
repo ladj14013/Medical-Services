@@ -9,11 +9,16 @@ interface PrintableListProps {
     appointments: Appointment[];
     doctor: Doctor;
     date: Date | undefined;
-    patient: User; // In a real app, this would be an array of patients
+    patients: User[];
 }
 
-export default function PrintableList({ appointments, doctor, date, patient }: PrintableListProps) {
+export default function PrintableList({ appointments, doctor, date, patients }: PrintableListProps) {
     if (!date) return null;
+
+    const getPatientPhoneNumber = (patientId: string) => {
+        const patient = patients.find(p => p.id === patientId);
+        return patient?.phoneNumber || 'غير متوفر';
+    }
 
     return (
         <div className="printable-area p-10 hidden">
@@ -26,7 +31,7 @@ export default function PrintableList({ appointments, doctor, date, patient }: P
                     </div>
                 </div>
                 <div className="text-center mt-6">
-                    <h2 className="text-xl font-semibold">قائمة المرضى ليوم: {format(date, 'd MMMM yyyy', { locale: ar })}</h2>
+                    <h2 className="text-xl font-semibold">قائمة المرضى ليوم: {date ? format(date, 'd MMMM yyyy', { locale: ar }) : ''}</h2>
                 </div>
             </header>
             <main>
@@ -45,7 +50,7 @@ export default function PrintableList({ appointments, doctor, date, patient }: P
                             <tr key={apt.id} className="border-b">
                                 <td className="p-2 border">{index + 1}</td>
                                 <td className="p-2 border">{apt.patientName}</td>
-                                <td className="p-2 border">{patient.phoneNumber}</td> {/* This is still a placeholder */}
+                                <td className="p-2 border">{getPatientPhoneNumber(apt.patientId)}</td>
                                 <td className="p-2 border">{apt.reason || 'غير محدد'}</td>
                                 <td className="p-2 border">{apt.time}</td>
                             </tr>
