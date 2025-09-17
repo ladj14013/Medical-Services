@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { addDays, format, isBefore, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
@@ -15,9 +15,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { Doctor } from '@/lib/types';
+import type { Doctor, User } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import AiSuggestionsDialog from './ai-suggestions-dialog';
+import { useRouter } from 'next/navigation';
 
 interface BookingClientProps {
   doctor: Doctor;
@@ -30,13 +31,32 @@ export default function BookingClient({ doctor }: BookingClientProps) {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAiDialogOpen, setAiDialogOpen] = useState(false);
-
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    const userRole = sessionStorage.getItem('userRole');
+    if (userJson && userRole === 'patient') {
+      setCurrentUser(JSON.parse(userJson));
+    }
+  }, []);
 
   const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
   const availableTimes = doctor.availability[formattedDate] || ['09:00 ص', '10:00 ص', '11:00 ص', '02:00 م', '03:00 م', '04:00 م'];
 
   const handleBooking = async () => {
+    if (!currentUser) {
+      toast({
+        title: 'يرجى تسجيل الدخول',
+        description: 'يجب عليك تسجيل الدخول كمريض لتتمكن من حجز موعد.',
+        variant: 'destructive',
+      });
+      router.push('/login?role=patient');
+      return;
+    }
+
     if (!date || !selectedTime) {
       toast({
         title: 'اختيار غير مكتمل',
@@ -58,8 +78,8 @@ export default function BookingClient({ doctor }: BookingClientProps) {
           doctorId: doctor.id,
           doctorName: doctor.name,
           doctorSpecialization: doctor.specialization,
-          patientId: 'user1', // Hardcoded for prototype
-          patientName: 'أليكس دو', // Hardcoded for prototype
+          patientId: currentUser.id,
+          patientName: currentUser.name,
           date: format(date, 'yyyy-MM-dd'),
           time: selectedTime,
           reason: 'فحص أولي',
@@ -69,7 +89,6 @@ export default function BookingClient({ doctor }: BookingClientProps) {
       const responseData = await response.json();
 
       if (!response.ok) {
-        // This is a more realistic conflict simulation based on the API response.
         if (response.status === 409) {
           toast({
             title: 'فشل الحجز',
@@ -86,6 +105,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
           description: `تم تأكيد موعدك مع ${doctor.name} في ${format(date, 'PPP', { locale: ar })} الساعة ${selectedTime}.`,
         });
         setSelectedTime('');
+        router.push('/dashboard/patient');
       }
 
     } catch (error) {
