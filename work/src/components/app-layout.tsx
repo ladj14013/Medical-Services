@@ -73,7 +73,7 @@ const bottomAdImage = data.placeholderImages.find(
 );
 
 
-function AdBanner({ image, className, priority = false }: { image?: { imageUrl: string, description: string, imageHint: string }, className?: string, priority?: boolean }) {
+function AdBanner({ image, className }: { image?: { imageUrl: string, description: string, imageHint: string }, className?: string }) {
     return (
         <div className={cn("bg-muted text-muted-foreground text-center relative h-48", className)}>
             {image ? (
@@ -83,7 +83,6 @@ function AdBanner({ image, className, priority = false }: { image?: { imageUrl: 
                     data-ai-hint={image.imageHint}
                     fill
                     className='object-cover'
-                    priority={priority}
                 />
             ) : (
                  <div className="flex items-center justify-center h-full">
@@ -105,7 +104,7 @@ function TopAdBanner() {
         transition={{ duration: 0.5, ease: 'easeInOut' }}
         className="overflow-hidden"
       >
-        <AdBanner image={topAdImage} className="border-b-0" priority={true} />
+        <AdBanner image={topAdImage} className="border-b-0"/>
       </motion.div>
       <Button
         variant="ghost"
