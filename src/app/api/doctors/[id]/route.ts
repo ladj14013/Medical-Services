@@ -1,3 +1,4 @@
+
 // src/app/api/doctors/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
@@ -9,8 +10,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const connection = db();
-    const [rows] = await connection.query("SELECT * FROM doctors WHERE id = ?", [params.id]);
+    const connection = await db();
+    // Exclude password from the SELECT statement
+    const [rows] = await connection.query("SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors WHERE id = ?", [params.id]);
     const doctors = (rows as any[]);
 
     if (doctors.length === 0) {
@@ -37,17 +39,41 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { status } = await request.json();
+    const body = await request.json();
+    const { status, bio, dailyAppointmentLimit, promotionalImages } = body;
+    
+    const connection = await db();
 
-    if (!status || !['approved', 'rejected'].includes(status)) {
-      return NextResponse.json({ message: 'حالة غير صالحة' }, { status: 400 });
+    const fieldsToUpdate: { [key: string]: any } = {};
+    if (status && ['approved', 'rejected'].includes(status)) {
+      fieldsToUpdate.status = status;
+    }
+    if (bio !== undefined) {
+      fieldsToUpdate.bio = bio;
+    }
+    if (dailyAppointmentLimit !== undefined) {
+      // In a real app, we might want to store this in a separate settings table
+      // For now, let's assume it's a field we can add to the doctors table.
+      // Since it's not in the schema, this will be a conceptual update for now
+      console.log(`Updating dailyAppointmentLimit for doctor ${params.id}: ${dailyAppointmentLimit}`);
+    }
+    if (promotionalImages !== undefined) {
+       fieldsToUpdate.promotionalImages = JSON.stringify(promotionalImages);
+    }
+    
+    if (Object.keys(fieldsToUpdate).length === 0) {
+      return NextResponse.json({ message: 'لا توجد حقول للتحديث' }, { status: 400 });
     }
 
-    const connection = db();
-    const query = "UPDATE doctors SET status = ? WHERE id = ?";
-    await connection.query(query, [status, params.id]);
+    const queryParts = Object.keys(fieldsToUpdate).map(key => `${key} = ?`);
+    const queryValues = [...Object.values(fieldsToUpdate), params.id];
 
-    return NextResponse.json({ message: 'تم تحديث حالة الطبيب بنجاح' });
+    const query = `UPDATE doctors SET ${queryParts.join(', ')} WHERE id = ?`;
+    
+    await connection.query(query, queryValues);
+
+    return NextResponse.json({ message: 'تم تحديث ملف الطبيب بنجاح' });
+
   } catch (error) {
     console.error(`DATABASE ERROR updating doctor ${params.id}:`, error);
     return NextResponse.json({ message: 'فشل تحديث الطبيب في قاعدة البيانات' }, { status: 500 });

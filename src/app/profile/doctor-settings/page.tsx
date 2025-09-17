@@ -1,8 +1,8 @@
+
 'use client';
 
 import AppLayout from '@/components/app-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { doctors } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -12,50 +12,123 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Doctor } from '@/lib/types';
-import { X, ImagePlus } from 'lucide-react';
+import { X, ImagePlus, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-
-// For this prototype, we'll assume Dr. Reed (id: '1') is logged in.
-const loggedInDoctorId = '1';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 
 const settingsSchema = z.object({
+  bio: z.string().min(10, 'يجب أن تكون السيرة الذاتية 10 أحرف على الأقل.').max(500, 'يجب أن تكون السيرة الذاتية 500 حرف كحد أقصى.'),
   dailyAppointmentLimit: z.coerce
     .number()
     .min(1, 'الحد الأدنى هو موعد واحد في اليوم.')
     .max(50, 'الحد الأقصى هو 50 موعدًا في اليوم.'),
-  profilePictureUrl: z.string().url('يجب أن يكون عنوان URL صالحًا.').optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function DoctorSettingsPage() {
   const { toast } = useToast();
-  // This would come from auth in a real app
-  const [doctor, setDoctor] = useState(doctors.find((doc) => doc.id === loggedInDoctorId));
+  const router = useRouter();
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newPromoImageUrl, setNewPromoImageUrl] = useState('');
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      dailyAppointmentLimit: doctor?.dailyAppointmentLimit || 10,
-      profilePictureUrl: '',
+      bio: '',
+      dailyAppointmentLimit: 10,
     },
   });
+  
+  useEffect(() => {
+    async function fetchDoctorData() {
+      setIsLoading(true);
+      const userJson = sessionStorage.getItem('loggedInUser');
+      const userRole = sessionStorage.getItem('userRole');
 
-  function onSubmit(data: SettingsFormValues) {
-    // In a real app, you would update the doctor's data in the database
-    console.log(data);
-    if (data.profilePictureUrl && doctor) {
-        // This is a simulation. In a real app, you'd upload the image
-        // and update the imageId with the new URL's ID.
-        // For now, we are not changing the actual image.
+      if (!userJson || userRole !== 'doctor') {
+        router.push('/login?role=doctor');
+        return;
+      }
+      
+      const loggedInDoctor: Doctor = JSON.parse(userJson);
+
+      try {
+        const res = await fetch(`/api/doctors/${loggedInDoctor.id}`);
+        if (!res.ok) throw new Error('Doctor not found');
+        
+        const doctorData = await res.json();
+        setDoctor(doctorData);
+        form.reset({
+          bio: doctorData.bio || '',
+          dailyAppointmentLimit: doctorData.dailyAppointmentLimit || 10,
+        });
+
+      } catch (error) {
+        console.error("Failed to fetch doctor settings:", error);
+        toast({ title: 'خطأ', description: 'فشل في تحميل بيانات الطبيب.', variant: 'destructive'});
+        router.push('/dashboard/doctor');
+      } finally {
+        setIsLoading(false);
+      }
     }
-    toast({
-      title: 'تم تحديث الإعدادات',
-      description: 'تم تحديث إعدادات ملفك الشخصي بنجاح.',
-    });
+    fetchDoctorData();
+  }, [router, toast, form]);
+
+
+  async function onSubmit(data: SettingsFormValues) {
+    if (!doctor) return;
+    setIsSubmitting(true);
+    try {
+        const response = await fetch(`/api/doctors/${doctor.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bio: data.bio }),
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل تحديث الملف الشخصي');
+        }
+        
+        setDoctor(prev => prev ? { ...prev, bio: data.bio } : null);
+        toast({
+          title: 'تم تحديث الإعدادات',
+          description: 'تم تحديث سيرتك الذاتية بنجاح.',
+        });
+
+    } catch (error) {
+        toast({ title: 'خطأ', description: 'فشل حفظ التغييرات.', variant: 'destructive' });
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
+  const updatePromotionalImages = async (newImages: { id: string; url: string; hint: string }[]) => {
+      if (!doctor) return;
+      
+      try {
+          const response = await fetch(`/api/doctors/${doctor.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ promotionalImages: newImages }),
+          });
+          if (!response.ok) throw new Error('فشل تحديث الصور');
+          
+          setDoctor(prev => prev ? { ...prev, promotionalImages: newImages } : null);
+          
+      } catch (error) {
+          toast({ title: 'خطأ', description: 'فشل تحديث الصور الترويجية.', variant: 'destructive' });
+          // Optionally revert state
+          const res = await fetch(`/api/doctors/${doctor.id}`);
+          const originalDoctor = await res.json();
+          setDoctor(originalDoctor);
+      }
   }
 
   const handleAddPromoImage = () => {
@@ -65,11 +138,8 @@ export default function DoctorSettingsPage() {
             url: newPromoImageUrl,
             hint: 'clinic office' // default hint
         };
-        const updatedDoctor: Doctor = {
-            ...doctor,
-            promotionalImages: [...(doctor.promotionalImages || []), newImage]
-        }
-        setDoctor(updatedDoctor);
+        const updatedImages = [...(doctor.promotionalImages || []), newImage];
+        updatePromotionalImages(updatedImages);
         setNewPromoImageUrl('');
         toast({ title: 'تمت إضافة الصورة الترويجية' });
     }
@@ -77,20 +147,27 @@ export default function DoctorSettingsPage() {
 
   const handleRemovePromoImage = (idToRemove: string) => {
     if (doctor) {
-       const updatedDoctor: Doctor = {
-            ...doctor,
-            promotionalImages: doctor.promotionalImages?.filter(img => img.id !== idToRemove)
-        }
-        setDoctor(updatedDoctor);
-        toast({ title: 'تمت إزالة الصورة الترويجية', variant: 'destructive' });
+       const updatedImages = doctor.promotionalImages?.filter(img => img.id !== idToRemove) || [];
+       updatePromotionalImages(updatedImages);
+       toast({ title: 'تمت إزالة الصورة الترويجية', variant: 'destructive' });
     }
   }
 
-  if (!doctor) {
+  if (isLoading || !doctor) {
     return (
         <AppLayout>
-            <div className="flex-1 space-y-4 p-4 sm:p-8">
-                <p>لم يتم العثور على الطبيب.</p>
+            <div className="flex-1 space-y-6 p-4 sm:p-8">
+                 <div className="flex items-center justify-between space-y-2">
+                    <Skeleton className="h-9 w-1/3" />
+                </div>
+                 <Card>
+                    <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
+                    <CardContent><Skeleton className="h-20 w-full" /></CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
+                    <CardContent><Skeleton className="h-40 w-full" /></CardContent>
+                </Card>
             </div>
         </AppLayout>
     )
@@ -101,19 +178,33 @@ export default function DoctorSettingsPage() {
       <div className="flex-1 space-y-6 p-4 sm:p-8">
         <div className="flex items-center justify-between space-y-2">
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            إعدادات الملف الشخصي للطبيب
+            إعدادات الملف الشخصي
           </h1>
         </div>
+        
         <Card>
             <CardHeader>
-                <CardTitle>إدارة المواعيد</CardTitle>
+                <CardTitle>السيرة الذاتية والبيانات العامة</CardTitle>
                 <CardDescription>
-                    قم بتعيين الحد الأقصى لعدد المواعيد التي يمكنك استقبالها يوميًا.
+                   قم بتحديث سيرتك الذاتية ومعلوماتك الأخرى هنا.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-sm">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+                         <FormField
+                            control={form.control}
+                            name="bio"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>السيرة الذاتية</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="أخبر المرضى عنك وعن خبراتك..." rows={5} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="dailyAppointmentLimit"
@@ -121,13 +212,17 @@ export default function DoctorSettingsPage() {
                                 <FormItem>
                                 <FormLabel>الحد الأقصى للمواعيد اليومية</FormLabel>
                                 <FormControl>
-                                    <Input type="number" {...field} />
+                                    <Input type="number" {...field} className="max-w-xs"/>
                                 </FormControl>
+                                <FormDescription>هذه الميزة قيد التطوير حاليًا.</FormDescription>
                                 <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">حفظ الإعدادات</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin"/>}
+                            حفظ التغييرات
+                        </Button>
                     </form>
                 </Form>
             </CardContent>
@@ -139,34 +234,10 @@ export default function DoctorSettingsPage() {
             <CardHeader>
                 <CardTitle>إدارة الصور</CardTitle>
                 <CardDescription>
-                    قم بتحديث صورتك الشخصية وأضف صورًا ترويجية لعيادتك.
+                    أضف صورًا ترويجية لعيادتك لجذب المرضى.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-                <Form {...form}>
-                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-sm">
-                        <FormField
-                            control={form.control}
-                            name="profilePictureUrl"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>تغيير الصورة الشخصية</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="الصق رابط الصورة الشخصية الجديدة هنا" {...field} />
-                                </FormControl>
-                                 <FormDescription>
-                                     في هذا النموذج المبدئي، يرجى لصق رابط مباشر للصورة.
-                                </FormDescription>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit">تحديث الصورة الشخصية</Button>
-                    </form>
-                </Form>
-                
-                <Separator />
-
                 <div>
                     <h3 className="text-lg font-medium mb-4">الصور الترويجية</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
@@ -207,7 +278,7 @@ export default function DoctorSettingsPage() {
                         </Button>
                     </div>
                      <p className="text-xs text-muted-foreground mt-2 max-w-sm">
-                        أضف صورًا لغرفة الانتظار، أو غرف الفحص، أو المعدات لجذب المزيد من المرضى.
+                        استخدم صورًا من مواقع مثل Unsplash أو Pexels، أو الصق روابط صور مباشرة.
                     </p>
                 </div>
             </CardContent>
@@ -216,3 +287,4 @@ export default function DoctorSettingsPage() {
     </AppLayout>
   );
 }
+
