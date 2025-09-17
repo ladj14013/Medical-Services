@@ -10,18 +10,41 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { ForumPost } from '@/lib/types';
+import type { ForumPost, Doctor } from '@/lib/types';
 import { MessageSquare, Plus, User, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function ForumPage() {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loggedInDoctor, setLoggedInDoctor] = useState<Doctor | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    const userRole = sessionStorage.getItem('userRole');
+    if (userJson && userRole === 'doctor') {
+        setLoggedInDoctor(JSON.parse(userJson));
+    } else {
+        toast({
+            title: "الوصول محظور",
+            description: "يجب أن تكون طبيباً لعرض هذه الصفحة.",
+            variant: "destructive"
+        });
+        router.push('/login?role=doctor');
+    }
+  }, [router, toast]);
+
+
+  useEffect(() => {
+    if(!loggedInDoctor) return;
+
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
@@ -35,7 +58,7 @@ export default function ForumPage() {
       }
     };
     fetchPosts();
-  }, []);
+  }, [loggedInDoctor]);
 
   return (
     <AppLayout>
@@ -49,9 +72,11 @@ export default function ForumPage() {
                 مكان لمناقشة الحالات والأبحاث مع الزملاء.
             </p>
           </div>
-          <Button variant="accent">
-            <Plus className="ml-2 h-5 w-5" />
-            إنشاء منشور جديد
+          <Button variant="accent" asChild>
+            <Link href="/forum/new">
+                <Plus className="ml-2 h-5 w-5" />
+                إنشاء منشور جديد
+            </Link>
           </Button>
         </div>
 
@@ -85,7 +110,7 @@ export default function ForumPage() {
                       {post.authorName} - {post.authorSpecialization}
                     </span>
                     <span>
-                      {formatDistanceToNow(new Date(post.date), {
+                      {formatDistanceToNow(new Date(post.createdAt), {
                         addSuffix: true,
                         locale: ar,
                       })}
@@ -99,7 +124,7 @@ export default function ForumPage() {
                 </CardContent>
                 <CardFooter className="flex justify-between items-center text-sm">
                    <div className="text-muted-foreground">
-                      {post.comments.length} تعليقات
+                      {Array.isArray(post.comments) ? post.comments.length : 0} تعليقات
                   </div>
                   <Button variant="ghost" size="sm" asChild>
                       <Link href={`/forum/post/${post.id}`} className="flex items-center gap-2">

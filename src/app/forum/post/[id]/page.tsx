@@ -141,9 +141,9 @@ export default function ForumPostPage({ params }: { params: { id: string } }) {
                 <div className="space-y-4">
                     <h2 className="text-2xl font-headline flex items-center gap-2">
                         <MessageCircle className="h-6 w-6" />
-                        التعليقات ({post.comments.length})
+                        التعليقات ({Array.isArray(post.comments) ? post.comments.length : 0})
                     </h2>
-                     {post.comments.map(comment => {
+                     {Array.isArray(post.comments) && post.comments.map(comment => {
                         const commenterImageId = `doctor-${Math.floor(Math.random() * 6) + 1}`;
                         const commenterImage = data.placeholderImages.find(img => img.id === commenterImageId);
 
@@ -171,7 +171,7 @@ export default function ForumPostPage({ params }: { params: { id: string } }) {
                     })}
                 </div>
 
-                <Card>
+                {loggedInDoctor && <Card>
                     <CardHeader>
                         <CardTitle className="font-headline">أضف تعليقًا</CardTitle>
                     </CardHeader>
@@ -190,7 +190,7 @@ export default function ForumPostPage({ params }: { params: { id: string } }) {
                             إرسال التعليق
                         </Button>
                     </CardFooter>
-                </Card>
+                </Card>}
             </div>
         </AppLayout>
     );
