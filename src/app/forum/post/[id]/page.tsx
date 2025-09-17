@@ -1,30 +1,103 @@
+'use client';
 import AppLayout from '@/components/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { User, Send, MessageCircle } from 'lucide-react';
+import { User, Send, MessageCircle, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import data from '@/lib/placeholder-images.json';
-import type { ForumPost } from '@/lib/types';
-import { forumPosts as staticForumPosts } from '@/lib/data';
+import type { ForumPost, Doctor } from '@/lib/types';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import PostLoading from './loading';
 
-async function getPost(id: string): Promise<ForumPost | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
-  try {
-    const res = await fetch(`${baseUrl}/api/forum/posts/${id}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error('Failed to fetch post:', error);
-    return null;
-  }
-}
 
-export default async function ForumPostPage({ params }: { params: { id: string } }) {
-    const post = await getPost(params.id);
+export default function ForumPostPage({ params }: { params: { id: string } }) {
+    const [post, setPost] = useState<ForumPost | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [comment, setComment] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loggedInDoctor, setLoggedInDoctor] = useState<Doctor | null>(null);
+    const { toast } = useToast();
+    const router = useRouter();
+
+
+    useEffect(() => {
+        const userJson = sessionStorage.getItem('loggedInUser');
+        const userRole = sessionStorage.getItem('userRole');
+        if (userJson && userRole === 'doctor') {
+            setLoggedInDoctor(JSON.parse(userJson));
+        } else {
+             toast({
+                title: "الوصول محظور",
+                description: "يجب أن تكون طبيباً مسجلاً لعرض هذه الصفحة.",
+                variant: "destructive"
+            });
+            router.push('/login?role=doctor');
+        }
+    }, [router, toast]);
+    
+    const fetchPost = async () => {
+        try {
+            const res = await fetch(`/api/forum/posts/${params.id}`, { cache: 'no-store' });
+            if (!res.ok) {
+                 setIsLoading(false);
+                 return;
+            };
+            const data = await res.json();
+            setPost(data);
+        } catch (error) {
+            console.error('Failed to fetch post:', error);
+            toast({ title: "خطأ", description: "فشل تحميل المنشور.", variant: "destructive" });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        if(loggedInDoctor) {
+            fetchPost();
+        }
+    }, [params.id, loggedInDoctor]);
+    
+
+    const handleAddComment = async () => {
+        if (!comment.trim() || !loggedInDoctor || !post) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/forum/posts/${post.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: comment,
+                    authorId: loggedInDoctor.id,
+                    authorName: loggedInDoctor.name,
+                }),
+            });
+            const newComment = await response.json();
+            if (!response.ok) {
+                throw new Error(newComment.message || 'فشل إضافة التعليق');
+            }
+            
+            // Re-fetch post data to get the latest comments
+            fetchPost();
+            setComment('');
+            toast({ title: 'تمت إضافة التعليق بنجاح' });
+        } catch (error) {
+             toast({ title: "خطأ", description: (error as Error).message, variant: "destructive" });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+
+    if (isLoading) {
+        return <PostLoading />;
+    }
 
     if (!post) {
         notFound();
@@ -53,7 +126,7 @@ export default async function ForumPostPage({ params }: { params: { id: string }
                                 </div>
                             </div>
                              <span>
-                                {formatDistanceToNow(new Date(post.date), {
+                                {formatDistanceToNow(new Date(post.createdAt), {
                                 addSuffix: true,
                                 locale: ar,
                                 })}
@@ -71,7 +144,6 @@ export default async function ForumPostPage({ params }: { params: { id: string }
                         التعليقات ({post.comments.length})
                     </h2>
                      {post.comments.map(comment => {
-                        // Assuming we don't have all commenter images, we can make a fallback
                         const commenterImageId = `doctor-${Math.floor(Math.random() * 6) + 1}`;
                         const commenterImage = data.placeholderImages.find(img => img.id === commenterImageId);
 
@@ -88,7 +160,7 @@ export default async function ForumPostPage({ params }: { params: { id: string }
                                         <div className="flex justify-between items-center">
                                             <span className="font-semibold">{comment.authorName}</span>
                                              <span className="text-xs text-muted-foreground">
-                                                {formatDistanceToNow(new Date(comment.date), { addSuffix: true, locale: ar })}
+                                                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ar })}
                                             </span>
                                         </div>
                                         <p className="text-sm text-muted-foreground pt-2">{comment.content}</p>
@@ -104,23 +176,29 @@ export default async function ForumPostPage({ params }: { params: { id: string }
                         <CardTitle className="font-headline">أضف تعليقًا</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Textarea placeholder="اكتب تعليقك هنا..." rows={4} />
+                        <Textarea 
+                          placeholder="اكتب تعليقك هنا..." 
+                          rows={4}
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          disabled={isSubmitting} />
                     </CardContent>
                     <CardFooter>
-                        <Button variant="accent">
+                        <Button variant="accent" onClick={handleAddComment} disabled={isSubmitting || !comment.trim()}>
+                            {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin"/>}
                             <Send className="ml-2 h-4 w-4" />
                             إرسال التعليق
                         </Button>
                     </CardFooter>
                 </Card>
-
             </div>
         </AppLayout>
     );
 }
 
-export async function generateStaticParams() {
-  return staticForumPosts.map((post) => ({
-    id: post.id,
-  }));
-}
+// Keeping this function for build-time optimization, but it won't be fully dynamic in `next build`
+// export async function generateStaticParams() {
+//   // In a real production app with many posts, you might fetch only the most recent/popular posts here
+//   // For now, we clear it as we move to dynamic rendering
+//   return [];
+// }

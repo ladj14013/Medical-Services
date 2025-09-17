@@ -49,15 +49,17 @@ export interface ForumPost {
   authorId: string;
   authorName: string;
   authorSpecialization: string;
-  date: string;
+  createdAt: string;
   content: string;
   comments: ForumComment[];
 }
 
 export interface ForumComment {
   id: string;
+  postId: string;
+  authorId: string;
   authorName: string;
-  date: string;
+  createdAt: string;
   content: string;
 }
 
