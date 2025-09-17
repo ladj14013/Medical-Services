@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Appointment } from '@/lib/types';
+import type { Appointment, User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Stethoscope } from 'lucide-react';
@@ -16,16 +16,27 @@ export default function AppointmentList() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-
-  // For this prototype, we'll hardcode the patient ID
-  const patientId = 'user1';
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    if (userJson) {
+      const user = JSON.parse(userJson);
+      setCurrentUser(user);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) {
+        setIsLoading(false); // If no user, stop loading.
+        return;
+    };
+
     const fetchAppointments = async () => {
       setIsLoading(true);
       try {
-        // Fetch appointments for the specific patient
-        const res = await fetch(`/api/appointments?patientId=${patientId}`);
+        // Fetch appointments for the specific logged-in patient
+        const res = await fetch(`/api/appointments?patientId=${currentUser.id}`);
         const data = await res.json();
 
         if (Array.isArray(data)) {
@@ -51,7 +62,7 @@ export default function AppointmentList() {
       }
     };
     fetchAppointments();
-  }, [toast]);
+  }, [currentUser, toast]);
 
   const handleCancel = (id: string) => {
     // In a real app, this would be a DELETE or PATCH request to the API
@@ -86,6 +97,19 @@ export default function AppointmentList() {
         ))}
       </div>
     );
+  }
+  
+  if (!currentUser) {
+    return (
+        <Card className="text-center p-10">
+          <CardContent>
+             <p className="text-muted-foreground">الرجاء تسجيل الدخول لعرض مواعيدك.</p>
+             <Button asChild className="mt-4">
+                 <Link href="/login?role=patient">تسجيل الدخول</Link>
+             </Button>
+          </CardContent>
+        </Card>
+    )
   }
 
   return (
@@ -140,7 +164,7 @@ export default function AppointmentList() {
           <CardContent>
              <p className="text-muted-foreground">ليس لديك مواعيد قادمة.</p>
              <Button asChild className="mt-4">
-                 <Link href="/#search">ابحث عن طبيب واحجز الآن</Link>
+                 <Link href="/">ابحث عن طبيب واحجز الآن</Link>
              </Button>
           </CardContent>
         </Card>
