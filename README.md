@@ -90,12 +90,24 @@
 
 1.  **إنشاء قاعدة البيانات**:
     - قم بتشغيل خادم MySQL.
-    - أنشئ قاعدة بيانات جديدة باسم `medical_db`.
+    - أنشئ قاعدة بيانات جديدة باسم `medical_db` إذا لم تكن موجودة.
+    ```sql
+    CREATE DATABASE IF NOT EXISTS medical_db;
+    ```
+    - **اختر قاعدة البيانات التي أنشأتها** لتكون النشطة (في معظم أدوات MySQL، يتم ذلك بالنقر المزدوج على اسمها). أو قم بتنفيذ الأمر:
+    ```sql
+    USE medical_db;
+    ```
 
-2.  **إنشاء الجداول**:
-    - قم بتنفيذ استعلامات SQL التالية في قاعدة بيانات `medical_db` لإنشاء الجداول اللازمة. يمكنك استخدام أداة مثل phpMyAdmin أو DBeaver.
+2.  **إنشاء الجداول (أو إعادة إنشائها)**:
+    - انسخ كتلة الأوامر التالية بالكامل ونفذها في أداة MySQL الخاصة بك. ستقوم هذه الأوامر بحذف الجداول القديمة (إذا كانت موجودة) ثم إنشاء الجداول الجديدة بالهيكل الصحيح.
 
     ```sql
+    -- حذف الجداول إذا كانت موجودة لضمان بداية نظيفة
+    DROP TABLE IF EXISTS `appointments`;
+    DROP TABLE IF EXISTS `doctors`;
+    DROP TABLE IF EXISTS `users`;
+
     --
     -- جدول المستخدمين (المرضى) `users`
     --
@@ -129,12 +141,10 @@
       `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
       `availability` json DEFAULT NULL,
       `promotionalImages` json DEFAULT NULL,
-      `connections` json DEFAULT NULL
+      `connections` json DEFAULT NULL,
+       PRIMARY KEY (`id`),
+       UNIQUE KEY `email` (`email`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-    ALTER TABLE `doctors`
-      ADD PRIMARY KEY (`id`),
-      ADD UNIQUE KEY `email` (`email`);
 
     --
     -- جدول المواعيد `appointments`
@@ -152,10 +162,6 @@
       `reason` text,
        PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-    ```
-    **ملاحظة:** إذا كان جدول `doctors` موجودًا بالفعل، استخدم الأمر التالي لإضافة حقل كلمة المرور بدلاً من إعادة إنشائه:
-    ```sql
-    ALTER TABLE `doctors` ADD `password` VARCHAR(255) NOT NULL AFTER `email`;
     ```
 
 ### الخطوة 3: إعداد متغيرات البيئة
