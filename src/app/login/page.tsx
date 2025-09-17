@@ -15,6 +15,8 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,38 +24,56 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  const role = searchParams.get('role') || 'patient';
+  const [role, setRole] = useState(searchParams.get('role') || 'patient');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // --- Corrected Login Logic ---
-    if (role === 'admin') {
-      if (email === 'admin@medical.app' && password === 'admin123') {
-        sessionStorage.setItem('isAuthenticated', 'true');
-        sessionStorage.setItem('userRole', 'admin');
-        toast({ title: 'تم تسجيل الدخول كمسؤول' });
-        router.push('/dashboard');
-      } else {
-        toast({
-          title: 'فشل تسجيل الدخول',
-          description: 'بيانات اعتماد المسؤول غير صحيحة.',
-          variant: 'destructive',
+    setIsLoading(true);
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role }),
         });
-      }
-    } else if (role === 'doctor') {
-        // This is a placeholder for real doctor authentication
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'فشل تسجيل الدخول');
+        }
+
+        // Store user info and role in sessionStorage
         sessionStorage.setItem('isAuthenticated', 'true');
-        sessionStorage.setItem('userRole', 'doctor');
-        toast({ title: 'تم تسجيل الدخول كطبيب' });
-        router.push('/dashboard/doctor');
-    } else {
-        // This is a placeholder for real patient authentication
-        sessionStorage.setItem('isAuthenticated', 'true');
-        sessionStorage.setItem('userRole', 'patient');
-        toast({ title: 'تم تسجيل الدخول كمريض' });
-        router.push('/dashboard/patient');
+        sessionStorage.setItem('userRole', data.user.role);
+        sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
+
+        toast({ title: 'تم تسجيل الدخول بنجاح', description: `مرحباً بعودتك، ${data.user.name}!` });
+        
+        // Redirect based on role
+        switch(data.user.role) {
+            case 'admin':
+                router.push('/dashboard');
+                break;
+            case 'doctor':
+                router.push('/dashboard/doctor');
+                break;
+            case 'patient':
+                router.push('/dashboard/patient');
+                break;
+            default:
+                router.push('/');
+        }
+
+    } catch (error) {
+        toast({
+            title: 'فشل تسجيل الدخول',
+            description: (error as Error).message,
+            variant: 'destructive',
+        });
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -66,11 +86,43 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline">تسجيل الدخول</CardTitle>
           <CardDescription>
-            {role === 'admin' ? 'الرجاء إدخال بيانات اعتماد المسؤول.' : 'أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.'}
+            {role === 'admin' ? 'الرجاء إدخال بيانات اعتماد المسؤول.' : 'أدخل بياناتك للوصول إلى حسابك.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
+            <RadioGroup
+                defaultValue={role}
+                onValueChange={setRole}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div>
+                  <RadioGroupItem value="patient" id="patient" className="sr-only" />
+                  <Label
+                    htmlFor="patient"
+                    className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground ${
+                      role === 'patient' ? 'border-primary' : ''
+                    }`}
+                  >
+                    أنا مريض
+                  </Label>
+                </div>
+                <div>
+                  <RadioGroupItem
+                    value="doctor"
+                    id="doctor"
+                    className="sr-only"
+                  />
+                  <Label
+                    htmlFor="doctor"
+                    className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground ${
+                      role === 'doctor' ? 'border-primary' : ''
+                    }`}
+                  >
+                   أنا طبيب
+                  </Label>
+                </div>
+            </RadioGroup>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
@@ -81,6 +133,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -92,9 +145,11 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
               تسجيل الدخول
             </Button>
              <div className="text-center">
