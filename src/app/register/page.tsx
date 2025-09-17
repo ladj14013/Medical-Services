@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,22 +24,41 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd create a user account here.
-    // For this prototype, we'll just simulate a successful registration.
+    setIsLoading(true);
     
-    sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userRole', 'patient');
-    
-    toast({
-      title: 'تم إنشاء الحساب بنجاح',
-      description: 'مرحباً بك! سيتم توجيهك إلى لوحة التحكم.',
-    });
-    // This is where you would set the auth state.
-    // For now, we redirect to the authenticated part of the app.
-    router.push('/dashboard/patient');
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phoneNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'فشل إنشاء الحساب');
+      }
+
+      toast({
+        title: 'تم إنشاء الحساب بنجاح',
+        description: 'مرحباً بك! سيتم توجيهك لتسجيل الدخول.',
+      });
+      
+      router.push('/login?role=patient');
+
+    } catch (error) {
+      toast({
+        title: 'خطأ في التسجيل',
+        description: (error as Error).message || 'حدث خطأ غير متوقع.',
+        variant: 'destructive',
+      });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -64,6 +84,7 @@ export default function RegisterPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -75,6 +96,7 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -83,9 +105,9 @@ export default function RegisterPage() {
                 id="phone"
                 type="tel"
                 placeholder="رقم هاتفك"
-                required
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -96,10 +118,12 @@ export default function RegisterPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              إنشاء حساب
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'جاري الإنشاء...' : 'إنشاء حساب'}
             </Button>
             <div className="text-center">
                 <Button variant="link" size="sm" asChild>

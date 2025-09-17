@@ -13,8 +13,10 @@ export interface Doctor {
   dailyAppointmentLimit?: number;
   promotionalImages?: { id: string; url: string; hint: string }[];
   connections?: string[];
-  email?: string;
+  email: string; // Made non-optional
+  password?: string; // Hashed password, optional on client
   phoneNumber?: string;
+  role: 'doctor';
 }
 
 export interface Appointment {
@@ -34,9 +36,11 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string; // Hashed password, optional on client
   phoneNumber?: string;
-  medicalHistory: string;
+  medicalHistory?: string;
   avatarId: string;
+  role: 'patient';
 }
 
 export interface ForumPost {

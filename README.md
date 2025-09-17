@@ -60,7 +60,7 @@
 
 3.  **إنشاء مستودع جديد على GitHub**:
     - اذهب إلى [github.com/new](https://github.com/new).
-    - أعطِ المستودع اسمًا (مثلاً: `medical-services-app`).
+    - أعطِ المستودع اسمًا (مثلاً: `lakhdar-medical-app`).
     - **مهم**: لا تقم بتحديد خيار إنشاء `README`, `.gitignore`, أو `license`.
 
 4.  **رفع المشروع إلى GitHub باستخدام الطرفية (Terminal)**:
@@ -97,6 +97,22 @@
 
     ```sql
     --
+    -- جدول المستخدمين (المرضى) `users`
+    --
+    CREATE TABLE `users` (
+      `id` varchar(255) NOT NULL,
+      `name` varchar(255) NOT NULL,
+      `email` varchar(255) NOT NULL,
+      `password` varchar(255) NOT NULL,
+      `phoneNumber` varchar(255) DEFAULT NULL,
+      `medicalHistory` text,
+      `avatarId` varchar(255) DEFAULT NULL,
+      `role` enum('patient') NOT NULL DEFAULT 'patient',
+       PRIMARY KEY (`id`),
+       UNIQUE KEY `email` (`email`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+    --
     -- جدول الأطباء `doctors`
     --
     CREATE TABLE `doctors` (
@@ -105,6 +121,7 @@
       `specialization` varchar(255) NOT NULL,
       `licenseNumber` varchar(255) DEFAULT NULL,
       `email` varchar(255) NOT NULL,
+      `password` varchar(255) NOT NULL,
       `phoneNumber` varchar(255) DEFAULT NULL,
       `location` varchar(255) DEFAULT NULL,
       `bio` text,
@@ -132,12 +149,13 @@
       `date` date NOT NULL,
       `time` varchar(255) NOT NULL,
       `status` enum('upcoming','completed','cancelled') NOT NULL DEFAULT 'upcoming',
-      `reason` text
+      `reason` text,
+       PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-    ALTER TABLE `appointments`
-      ADD PRIMARY KEY (`id`);
-
+    ```
+    **ملاحظة:** إذا كان جدول `doctors` موجودًا بالفعل، استخدم الأمر التالي لإضافة حقل كلمة المرور بدلاً من إعادة إنشائه:
+    ```sql
+    ALTER TABLE `doctors` ADD `password` VARCHAR(255) NOT NULL AFTER `email`;
     ```
 
 ### الخطوة 3: إعداد متغيرات البيئة
