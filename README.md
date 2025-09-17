@@ -104,6 +104,8 @@
 
     ```sql
     -- حذف الجداول إذا كانت موجودة لضمان بداية نظيفة
+    DROP TABLE IF EXISTS `forum_comments`;
+    DROP TABLE IF EXISTS `forum_posts`;
     DROP TABLE IF EXISTS `appointments`;
     DROP TABLE IF EXISTS `doctors`;
     DROP TABLE IF EXISTS `users`;
@@ -161,6 +163,34 @@
       `status` enum('upcoming','completed','cancelled') NOT NULL DEFAULT 'upcoming',
       `reason` text,
        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+    --
+    -- جدول منشورات المنتدى `forum_posts`
+    --
+    CREATE TABLE `forum_posts` (
+      `id` varchar(255) NOT NULL,
+      `title` varchar(255) NOT NULL,
+      `content` text NOT NULL,
+      `authorId` varchar(255) NOT NULL,
+      `authorName` varchar(255) NOT NULL,
+      `authorSpecialization` varchar(255) NOT NULL,
+      `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+    --
+    -- جدول تعليقات المنتدى `forum_comments`
+    --
+    CREATE TABLE `forum_comments` (
+      `id` varchar(255) NOT NULL,
+      `postId` varchar(255) NOT NULL,
+      `authorId` varchar(255) NOT NULL,
+      `authorName` varchar(255) NOT NULL,
+      `content` text NOT NULL,
+      `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      KEY `postId` (`postId`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ```
 
