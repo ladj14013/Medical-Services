@@ -44,7 +44,7 @@ export default function BookingClient({ doctor }: BookingClientProps) {
   }, []);
 
   const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
-  const availableTimes = doctor.availability[formattedDate] || ['09:00 ص', '10:00 ص', '11:00 ص', '02:00 م', '03:00 م', '04:00 م'];
+  const availableTimes = (doctor.availability && doctor.availability[formattedDate]) || ['09:00 ص', '10:00 ص', '11:00 ص', '02:00 م', '03:00 م', '04:00 م'];
 
   const handleBooking = async () => {
     if (!currentUser) {
@@ -125,6 +125,20 @@ export default function BookingClient({ doctor }: BookingClientProps) {
     if (isBefore(day, new Date()) && !isSameDay(day, new Date())) {
       return true;
     }
+    const dayOfWeek = format(day, 'eeee');
+    const formattedDateKey = format(day, 'yyyy-MM-dd');
+    const availabilityForDay = doctor.availability ? doctor.availability[formattedDateKey] : undefined;
+    
+    // Disable if availability is explicitly an empty array for that day
+    if(Array.isArray(availabilityForDay) && availabilityForDay.length === 0){
+        return true;
+    }
+
+    // Default logic for weekends if no specific availability is set
+    if (!availabilityForDay && (dayOfWeek === 'Friday' || dayOfWeek === 'Saturday')) {
+      return true;
+    }
+
     return false;
   };
 
