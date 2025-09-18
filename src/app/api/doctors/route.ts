@@ -11,12 +11,15 @@ export async function GET(request: Request) {
   try {
     const connection = await db();
     // Exclude password from the SELECT statement for security
-    let query = "SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors";
+    let query = "SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections, role FROM doctors";
     const params = [];
     
     // Default to approved doctors if no status is specified
-    if (status !== 'all') {
-      query += " WHERE status = 'approved'";
+    if (status && status !== 'all') {
+      query += " WHERE status = ?";
+      params.push(status);
+    } else if (!status) {
+       query += " WHERE status = 'approved'";
     }
     
     const [rows] = await connection.query(query, params);
@@ -32,7 +35,6 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error('DATABASE ERROR:', error);
-    // Return an empty array in case of an error to prevent client-side crashes
     return NextResponse.json({ message: 'فشل الاتصال بقاعدة البيانات' }, { status: 500 });
   }
 }
@@ -72,11 +74,12 @@ export async function POST(request: Request) {
       availability: JSON.stringify({}), // Default empty availability
       promotionalImages: JSON.stringify([]),
       connections: JSON.stringify([]),
+      role: 'doctor',
     };
 
     const query = `
-      INSERT INTO doctors (id, name, specialization, licenseNumber, email, password, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO doctors (id, name, specialization, licenseNumber, email, password, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     await connection.query(query, [
@@ -94,6 +97,7 @@ export async function POST(request: Request) {
       newDoctor.availability,
       newDoctor.promotionalImages,
       newDoctor.connections,
+      newDoctor.role,
     ]);
 
     return NextResponse.json({ message: 'تم استلام طلب تسجيل الطبيب بنجاح' }, { status: 201 });

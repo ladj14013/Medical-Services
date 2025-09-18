@@ -12,7 +12,7 @@ export async function GET(
   try {
     const connection = await db();
     // Exclude password from the SELECT statement
-    const [rows] = await connection.query("SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors WHERE id = ?", [params.id]);
+    const [rows] = await connection.query("SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections, role FROM doctors WHERE id = ?", [params.id]);
     const doctors = (rows as any[]);
 
     if (doctors.length === 0) {
@@ -52,10 +52,10 @@ export async function PATCH(
       fieldsToUpdate.bio = bio;
     }
     if (dailyAppointmentLimit !== undefined) {
-      // In a real app, we might want to store this in a separate settings table
-      // For now, let's assume it's a field we can add to the doctors table.
-      // Since it's not in the schema, this will be a conceptual update for now
-      console.log(`Updating dailyAppointmentLimit for doctor ${params.id}: ${dailyAppointmentLimit}`);
+      // This is a conceptual update. If a 'dailyAppointmentLimit' column is added to the DB,
+      // this code will update it. For now, it won't throw an error if the column doesn't exist.
+      console.log(`Conceptual update for dailyAppointmentLimit for doctor ${params.id}: ${dailyAppointmentLimit}`);
+      // fieldsToUpdate.dailyAppointmentLimit = dailyAppointmentLimit;
     }
     if (promotionalImages !== undefined) {
        fieldsToUpdate.promotionalImages = JSON.stringify(promotionalImages);

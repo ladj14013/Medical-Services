@@ -26,7 +26,7 @@
 
 ### ⚙️ للمسؤول (Admin)
 - **لوحة تحكم المسؤول**: واجهة لمراجعة طلبات تسجيل الأطباء الجدد والموافقة عليها أو رفضها.
-- **عارض قاعدة البيانات**: أداة لعرض محتويات جداول التطبيق مباشرة لمراقبة البيانات.
+- **عارض قاعدة البيانات**: أداة لعرض محتويات جدولي `doctors` و`appointments` مباشرة من التطبيق لمراقبة البيانات.
 
 ## 🚀 التقنيات المستخدمة
 
@@ -144,6 +144,7 @@
       `availability` json DEFAULT NULL,
       `promotionalImages` json DEFAULT NULL,
       `connections` json DEFAULT NULL,
+      `role` enum('doctor') NOT NULL DEFAULT 'doctor',
        PRIMARY KEY (`id`),
        UNIQUE KEY `email` (`email`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -164,7 +165,7 @@
       `reason` text,
        PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-    
+
     --
     -- جدول منشورات المنتدى `forum_posts`
     --

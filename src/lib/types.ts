@@ -59,9 +59,10 @@ export interface ForumComment {
   postId: string;
   authorId: string;
   authorName: string;
-  createdAt: string;
   content: string;
+  createdAt: string;
 }
+
 
 export interface Message {
   id: string;
