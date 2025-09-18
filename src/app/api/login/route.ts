@@ -65,11 +65,12 @@ export async function POST(request: Request) {
 
     // 5. Successful login, return user data (without password)
     const {password: _, ...userToReturn} = user;
-    (userToReturn as any).role = userRole;
-
 
     return NextResponse.json({
-      user: userToReturn,
+      user: {
+        ...userToReturn,
+        role: userRole,
+      },
       message: 'تم تسجيل الدخول بنجاح',
     });
 
