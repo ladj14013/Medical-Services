@@ -199,11 +199,13 @@
    - **كلمة المرور** لجميع الحسابات هي: `password123`.
 
    ```sql
-   -- حذف البيانات القديمة (إذا كانت موجودة) قبل إدخال البيانات الجديدة
-    DELETE FROM `doctors`;
-    DELETE FROM `users`;
+    -- مسح الجداول قبل إدخال بيانات جديدة لتجنب الأخطاء
+    SET SQL_SAFE_UPDATES = 0;
+    TRUNCATE TABLE `doctors`;
+    TRUNCATE TABLE `users`;
+    SET SQL_SAFE_UPDATES = 1;
 
-    -- كلمة المرور المشفرة لـ 'password123'
+    -- كلمة المرور المشفرة لـ 'password123' (متوافقة مع bcryptjs)
     SET @hashed_password = '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2';
 
     -- إدخال بيانات الأطباء
