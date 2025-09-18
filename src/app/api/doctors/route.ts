@@ -78,8 +78,8 @@ export async function POST(request: Request) {
     };
 
     const query = `
-      INSERT INTO doctors (id, name, specialization, licenseNumber, email, password, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO doctors (id, name, specialization, licenseNumber, email, password, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections, role) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     await connection.query(query, [
@@ -97,6 +97,7 @@ export async function POST(request: Request) {
       newDoctor.availability,
       newDoctor.promotionalImages,
       newDoctor.connections,
+      newDoctor.role
     ]);
 
     return NextResponse.json({ message: 'تم استلام طلب تسجيل الطبيب بنجاح' }, { status: 201 });

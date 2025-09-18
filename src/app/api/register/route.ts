@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser: Partial<User> = {
+    const newUser: User = {
       id: uuidv4(),
       name,
       email,

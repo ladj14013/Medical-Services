@@ -178,7 +178,7 @@
       `authorSpecialization` varchar(255) NOT NULL,
       `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
     --
     -- جدول تعليقات المنتدى `forum_comments`
