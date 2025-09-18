@@ -13,6 +13,7 @@ import PrintableList from '@/components/dashboard/doctor/printable-list';
 import type { Appointment, Doctor, User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import DoctorDashboardLoading from './loading';
 
 // Helper function to fetch multiple users
 async function fetchPatients(patientIds: string[]): Promise<User[]> {
@@ -79,25 +80,7 @@ export default function DoctorDashboardPage() {
   }, [router]);
 
   if (isLoading || !doctor) {
-    return (
-      <AppLayout>
-        <div className="flex-1 space-y-4 p-4 sm:p-8">
-          <div className="flex items-center justify-between space-y-2">
-            <Skeleton className="h-9 w-64" />
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-               <Skeleton className="h-40 w-full rounded-lg" />
-               <Skeleton className="h-40 w-full rounded-lg" />
-               <Skeleton className="h-40 w-full rounded-lg" />
-          </div>
-          <div className="space-y-4">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-28 w-full rounded-lg" />
-              <Skeleton className="h-28 w-full rounded-lg" />
-          </div>
-        </div>
-      </AppLayout>
-    );
+    return <DoctorDashboardLoading />;
   }
     
   if (!patients) {

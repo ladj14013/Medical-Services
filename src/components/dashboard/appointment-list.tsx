@@ -11,20 +11,26 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 export default function AppointmentList() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const userJson = sessionStorage.getItem('loggedInUser');
-    if (userJson) {
+    const userRole = sessionStorage.getItem('userRole');
+
+    if (userJson && userRole === 'patient') {
       const user = JSON.parse(userJson);
       setCurrentUser(user);
+    } else {
+      router.push('/login?role=patient');
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -78,7 +84,7 @@ export default function AppointmentList() {
   };
 
   const upcomingAppointments = Array.isArray(appointments) 
-    ? appointments.filter((apt) => apt.status === 'upcoming')
+    ? appointments.filter((apt) => apt.status === 'upcoming').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     : [];
 
   if (isLoading) {
@@ -128,7 +134,7 @@ export default function AppointmentList() {
                     {apt.doctorSpecialization}
                   </p>
                 </div>
-                <Badge variant="secondary">{apt.status === 'upcoming' ? 'قادم' : apt.status}</Badge>
+                <Badge variant="default">{apt.status === 'upcoming' ? 'قادم' : apt.status}</Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -163,7 +169,7 @@ export default function AppointmentList() {
         <Card className="text-center p-10">
           <CardContent>
              <p className="text-muted-foreground">ليس لديك مواعيد قادمة.</p>
-             <Button asChild className="mt-4">
+             <Button asChild className="mt-4" variant="accent">
                  <Link href="/">ابحث عن طبيب واحجز الآن</Link>
              </Button>
           </CardContent>

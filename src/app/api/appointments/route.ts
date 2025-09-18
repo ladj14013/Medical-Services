@@ -65,17 +65,13 @@ export async function POST(request: Request) {
     if ((existingAppointments as any[]).length > 0) {
       return NextResponse.json({ message: 'هذا الموعد محجوز بالفعل' }, { status: 409 });
     }
-    
-    // In a real app, patientId would come from the authenticated session
-    const finalPatientId = patientId || 'user1'; 
-    const finalPatientName = patientName || 'أليكس دو';
 
     const newAppointment: Appointment = {
       id: uuidv4(),
       doctorId,
-      patientId: finalPatientId,
+      patientId,
       doctorName,
-      patientName: finalPatientName,
+      patientName,
       doctorSpecialization,
       date,
       time,
