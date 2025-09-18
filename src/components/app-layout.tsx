@@ -147,28 +147,31 @@ function AppLayoutContent({
     setIsClient(true);
     const authStatus = sessionStorage.getItem('isAuthenticated');
     const role = sessionStorage.getItem('userRole') as 'patient' | 'doctor' | 'admin' | null;
+    const userJson = sessionStorage.getItem('loggedInUser');
 
-    if (authStatus === 'true' && role) {
+    if (authStatus === 'true' && role && userJson) {
       setIsAuthenticated(true);
       setUserRole(role);
+      setLoggedInUser(JSON.parse(userJson));
+    } else {
+        setIsAuthenticated(false);
+        setUserRole(null);
+        setLoggedInUser(null);
     }
-  }, []);
+  }, [pathname]);
+
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !loggedInUser) return;
 
-    async function fetchUser() {
+    async function fetchFreshData() {
       const role = sessionStorage.getItem('userRole');
-      const id = role === 'doctor' ? loggedInDoctorId : loggedInUserId;
-      const endpoint = role === 'doctor' ? `/api/doctors/${id}` : `/api/users/${id}`;
       
       try {
-        const res = await fetch(endpoint);
-        const userData = await res.json();
-        setLoggedInUser(userData);
-        
         if (role === 'doctor') {
-            const messagesRes = await fetch(`/api/messages?userId=${id}`);
+            const [messagesRes] = await Promise.all([
+                fetch(`/api/messages?userId=${loggedInUser.id}`),
+            ]);
             const messagesData = await messagesRes.json();
             setMessages(messagesData);
         }
@@ -177,8 +180,8 @@ function AppLayoutContent({
         console.error("Failed to fetch user data:", error);
       }
     }
-    fetchUser();
-  }, [isAuthenticated]);
+    fetchFreshData();
+  }, [isAuthenticated, loggedInUser]);
 
   const unreadMessages = loggedInUser && userRole === 'doctor' 
     ? messages.filter(m => m.recipientId === loggedInUser.id && !m.read)
@@ -208,14 +211,6 @@ function AppLayoutContent({
         sessionStorage.setItem('loginRole', role);
       }
     }
-
-    if (pathname === '/dashboard/patient' || pathname === '/dashboard/doctor' || pathname === '/dashboard') {
-        const authSet = sessionStorage.getItem('isAuthenticated');
-        if (!authSet) {
-             sessionStorage.setItem('isAuthenticated', 'true');
-             setIsAuthenticated(true);
-        }
-    }
   }, [pathname]);
 
   const handleLogout = () => {
@@ -243,7 +238,7 @@ function AppLayoutContent({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {isClient && isAuthenticated && loggedInUser ? (
+          {isClient && isAuthenticated && loggedInUser && loggedInUser.name ? (
             <>
                 <span className="text-sm text-muted-foreground hidden sm:inline">
                     مرحباً بعودتك، {loggedInUser.name}!
@@ -324,7 +319,7 @@ function AppLayoutContent({
                           data-ai-hint={userAvatar.imageHint}
                         />
                       )}
-                      <AvatarFallback>{loggedInUser.name.charAt(0)}</AvatarFallback>
+                      {loggedInUser && loggedInUser.name && <AvatarFallback>{loggedInUser.name.charAt(0)}</AvatarFallback>}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -364,7 +359,7 @@ function AppLayoutContent({
               </DropdownMenu>
             </>
           ) : (
-             isClient && <div className="flex items-center gap-2">
+             isClient && !isAuthenticated && <div className="flex items-center gap-2">
                <Button asChild variant="outline"><Link href="/login">تسجيل الدخول</Link></Button>
                <Button onClick={() => setIsRegisterAsDialogOpen(true)}>إنشاء حساب</Button>
              </div>
@@ -401,6 +396,11 @@ function AppLayoutContent({
     { id: 'messaging', label: 'المراسلة', icon: Send, action: () => setIsMessagingDialogOpen(true) },
     { id: 'settings', href: '/profile/doctor-settings', label: 'الإعدادات', icon: Settings },
   ];
+  
+  const adminMenu = [
+     { id: 'dashboard', href: '/dashboard', label: 'لوحة التحكم', icon: LayoutGrid },
+     { id: 'database', href: '/dashboard/database', label: 'قاعدة البيانات', icon: Home }, // Changed icon
+  ];
 
   const unauthenticatedMenu = [
     { id: 'home', href: '/', label: 'الرئيسية', icon: Home },
@@ -412,9 +412,10 @@ function AppLayoutContent({
   const getMenuItems = () => {
     if (isAuthenticated) {
         switch(userRole) {
+            case 'admin': return adminMenu;
             case 'doctor': return doctorMenu;
             case 'patient': return patientMenu;
-            default: return patientMenu; // Default authenticated view
+            default: return unauthenticatedMenu;
         }
     }
     return unauthenticatedMenu;
