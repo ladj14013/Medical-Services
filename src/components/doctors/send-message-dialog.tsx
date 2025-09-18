@@ -14,10 +14,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import type { Doctor } from '@/lib/types';
+import type { Doctor, User } from '@/lib/types';
 import { Send, UserPlus } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { doctors } from '@/lib/data';
 
 interface SendMessageDialogProps {
   recipient: Doctor;
@@ -26,21 +25,24 @@ interface SendMessageDialogProps {
 export default function SendMessageDialog({ recipient }: SendMessageDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState<User | Doctor | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // This would come from auth in a real app
-  const loggedInDoctorId = '1'; 
-  const loggedInDoctor = doctors.find(doc => doc.id === loggedInDoctorId);
-  const areConnected = loggedInDoctor?.connections?.includes(recipient.id);
-
   useEffect(() => {
     const role = sessionStorage.getItem('userRole');
+    const userJson = sessionStorage.getItem('loggedInUser');
     setUserRole(role);
+    if(userJson) {
+        setLoggedInUser(JSON.parse(userJson));
+    }
   }, []);
 
+  const loggedInDoctor = userRole === 'doctor' ? (loggedInUser as Doctor) : null;
+  const areConnected = loggedInDoctor?.connections?.includes(recipient.id);
+
   const handleSend = () => {
-    if (message.trim()) {
+    if (message.trim() && loggedInDoctor) {
       // In a real app, this would send the message to the backend.
       // For now, it just simulates the action.
       console.log(`Sending message to ${recipient.name}: ${message}`);
@@ -56,7 +58,7 @@ export default function SendMessageDialog({ recipient }: SendMessageDialogProps)
     }
   };
   
-  if (userRole !== 'doctor' || recipient.id === loggedInDoctorId) {
+  if (userRole !== 'doctor' || !loggedInDoctor || recipient.id === loggedInDoctor.id) {
     return null;
   }
 
