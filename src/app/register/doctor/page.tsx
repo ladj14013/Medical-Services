@@ -40,7 +40,7 @@ export default function RegisterDoctorPage() {
         body: JSON.stringify({
           name,
           email,
-          password, // Note: In a real app, password should be handled securely on the backend
+          password,
           specialization,
           licenseNumber: license,
           phoneNumber: phoneNumber
@@ -61,7 +61,7 @@ export default function RegisterDoctorPage() {
     } catch (error) {
       toast({
         title: 'خطأ في التسجيل',
-        description: (error as Error).message || 'حدث خطأ غير متوقع.',
+        description: (error as Error).message,
         variant: 'destructive',
       });
     } finally {

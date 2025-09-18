@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       availability: JSON.stringify({}), // Default empty availability
       promotionalImages: JSON.stringify([]),
       connections: JSON.stringify([]),
-      role: 'doctor',
+      role: 'doctor' as const,
     };
 
     const query = `
