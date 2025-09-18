@@ -195,6 +195,35 @@
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ```
 
+3. **إضافة بيانات أولية (اختياري)**:
+   - لتسهيل الاختبار، يمكنك تنفيذ أوامر SQL التالية لإضافة 4 أطباء و 4 مرضى.
+   - **كلمة المرور** لجميع الحسابات هي: `password123`.
+
+   ```sql
+   -- حذف البيانات القديمة (إذا كانت موجودة) قبل إدخال البيانات الجديدة
+    DELETE FROM `doctors`;
+    DELETE FROM `users`;
+
+    -- كلمة المرور المشفرة لـ 'password123'
+    SET @hashed_password = '$2a$10$e.E5..1l/C5tC6C.E5..1ujX.w/6.E5..1l/C5tC6C.E5..1u';
+
+    -- إدخال بيانات الأطباء
+    INSERT INTO `doctors` (`id`, `name`, `specialization`, `licenseNumber`, `email`, `password`, `phoneNumber`, `location`, `bio`, `imageId`, `status`, `availability`, `promotionalImages`, `connections`, `role`) VALUES
+    ('doc-1', 'د. أمين صالح', 'طب القلب', 'CL-112233', 'amin.saleh@medical.app', @hashed_password, '555-0101', 'الرياض', 'طبيب قلب بخبرة 20 عامًا في إدارة الحالات المعقدة للقلب.', 'doctor-1', 'approved', '{"2024-09-10": ["09:00", "10:00"], "2024-09-11": ["14:00"]}', '[]', '[]', 'doctor'),
+    ('doc-2', 'د. فاطمة الزهراء', 'الأمراض الجلدية', 'DL-445566', 'fatima.zahra@medical.app', @hashed_password, '555-0102', 'جدة', 'متخصصة في الأمراض الجلدية التجميلية والليزر.', 'doctor-2', 'approved', '{}', '[]', '[]', 'doctor'),
+    ('doc-3', 'د. يوسف حمدان', 'طب الأطفال', 'PL-778899', 'youssef.hamdan@medical.app', @hashed_password, '555-0103', 'الدمام', 'محبوب من قبل الأطفال وأولياء الأمور لنهجه الودي في الرعاية الصحية.', 'doctor-3', 'approved', '{}', '[]', '[]', 'doctor'),
+    ('doc-4', 'د. نورة خالد', 'طب الأعصاب', 'NL-101112', 'noura.khaled@medical.app', @hashed_password, '555-0104', 'مكة', 'خبيرة في تشخيص وعلاج اضطرابات الصداع النصفي والصرع.', 'doctor-4', 'approved', '{}', '[]', '[]', 'doctor');
+
+    -- إدخال بيانات المرضى
+    INSERT INTO `users` (`id`, `name`, `email`, `password`, `phoneNumber`, `medicalHistory`, `avatarId`, `role`) VALUES
+    ('user-1', 'علي أحمد', 'ali.ahmed@email.com', @hashed_password, '555-0201', 'يعاني من ارتفاع ضغط الدم.', 'user-avatar-1', 'patient'),
+    ('user-2', 'سارة محمود', 'sara.mahmoud@email.com', @hashed_password, '555-0202', 'تاريخ من الصداع النصفي.', 'user-avatar-2', 'patient'),
+    ('user-3', 'خالد عبد الله', 'khaled.abdullah@email.com', @hashed_password, '555-0203', NULL, 'user-avatar-3', 'patient'),
+    ('user-4', 'هند إبراهيم', 'hind.ibrahim@email.com', @hashed_password, '555-0204', 'حساسية من البنسلين.', 'user-avatar-4', 'patient');
+
+   ```
+
+
 ### الخطوة 3: إعداد متغيرات البيئة
 
 1.  **إنشاء ملف `.env`**:
