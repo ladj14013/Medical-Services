@@ -194,7 +194,6 @@
       KEY `postId` (`postId`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ```
-
 3. **إضافة بيانات أولية (اختياري)**:
    - لتسهيل الاختبار، يمكنك تنفيذ أوامر SQL التالية لإضافة 4 أطباء و 4 مرضى.
    - **كلمة المرور** لجميع الحسابات هي: `password123`.
