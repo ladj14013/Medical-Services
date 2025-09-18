@@ -99,8 +99,10 @@
     USE medical_db;
     ```
 
-2.  **إنشاء الجداول (أو إعادة إنشائها)**:
-    - انسخ كتلة الأوامر التالية بالكامل ونفذها في أداة MySQL الخاصة بك. ستقوم هذه الأوامر بحذف الجداول القديمة (إذا كانت موجودة) ثم إنشاء الجداول الجديدة بالهيكل الصحيح.
+2.  **إنشاء الجداول وإضافة البيانات الأولية**:
+    - **انسخ كتلة الأوامر التالية بالكامل ونفذها في أداة MySQL الخاصة بك.**
+    - ستقوم هذه الأوامر بحذف الجداول القديمة (إذا كانت موجودة)، ثم إنشاء الجداول الجديدة بالهيكل الصحيح، ثم إضافة 4 أطباء و 4 مرضى.
+    - **كلمة المرور** لجميع الحسابات هي: `password123`.
 
     ```sql
     -- حذف الجداول إذا كانت موجودة لضمان بداية نظيفة
@@ -193,16 +195,7 @@
       PRIMARY KEY (`id`),
       KEY `postId` (`postId`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-    ```
-3. **إضافة بيانات أولية (اختياري)**:
-   - لتسهيل الاختبار، يمكنك تنفيذ أوامر SQL التالية لإضافة 4 أطباء و 4 مرضى.
-   - **كلمة المرور** لجميع الحسابات هي: `password123`.
-
-   ```sql
-    -- مسح الجداول قبل إدخال بيانات جديدة لتجنب الأخطاء
-    DELETE FROM `doctors`;
-    DELETE FROM `users`;
-
+    
     -- إدخال بيانات الأطباء
     INSERT INTO `doctors` (`id`, `name`, `specialization`, `licenseNumber`, `email`, `password`, `phoneNumber`, `location`, `bio`, `imageId`, `status`, `availability`, `promotionalImages`, `connections`, `role`) VALUES
     ('doc-1', 'د. أمين صالح', 'طب القلب', 'CL-112233', 'amin.saleh@medical.app', '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2', '555-0101', 'الرياض', 'طبيب قلب بخبرة 20 عامًا في إدارة الحالات المعقدة للقلب.', 'doctor-1', 'approved', '{"2024-09-10": ["09:00", "10:00"], "2024-09-11": ["14:00"]}', '[]', '[]', 'doctor'),
@@ -216,8 +209,7 @@
     ('user-2', 'سارة محمود', 'sara.mahmoud@email.com', '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2', '555-0202', 'تاريخ من الصداع النصفي.', 'user-avatar-2', 'patient'),
     ('user-3', 'خالد عبد الله', 'khaled.abdullah@email.com', '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2', '555-0203', NULL, 'user-avatar-3', 'patient'),
     ('user-4', 'هند إبراهيم', 'hind.ibrahim@email.com', '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2', '555-0204', 'حساسية من البنسلين.', 'user-avatar-4', 'patient');
-   ```
-
+    ```
 
 ### الخطوة 3: إعداد متغيرات البيئة
 
