@@ -11,13 +11,15 @@ export async function GET(request: Request) {
   try {
     const connection = await db();
     // Exclude password from the SELECT statement for security
-    let query = "SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors WHERE status = 'approved'";
+    let query = "SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors";
+    const params = [];
     
-    if (status === 'all') {
-      query = "SELECT id, name, specialization, licenseNumber, email, phoneNumber, location, bio, imageId, status, availability, promotionalImages, connections FROM doctors";
+    // Default to approved doctors if no status is specified
+    if (status !== 'all') {
+      query += " WHERE status = 'approved'";
     }
     
-    const [rows] = await connection.query(query);
+    const [rows] = await connection.query(query, params);
     
     const doctors = (rows as any[]).map(doc => ({
       ...doc,
@@ -30,6 +32,7 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error('DATABASE ERROR:', error);
+    // Return an empty array in case of an error to prevent client-side crashes
     return NextResponse.json({ message: 'فشل الاتصال بقاعدة البيانات' }, { status: 500 });
   }
 }
