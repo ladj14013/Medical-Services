@@ -204,7 +204,7 @@
     DELETE FROM `users`;
 
     -- كلمة المرور المشفرة لـ 'password123'
-    SET @hashed_password = '$2a$10$e.E5..1l/C5tC6C.E5..1ujX.w/6.E5..1l/C5tC6C.E5..1u';
+    SET @hashed_password = '$2a$10$3i1q7C1y9a7t5B8j6D4c2uX1wZ0e.V1g.H3k.L5p.Q7r.S9i.O2c2';
 
     -- إدخال بيانات الأطباء
     INSERT INTO `doctors` (`id`, `name`, `specialization`, `licenseNumber`, `email`, `password`, `phoneNumber`, `location`, `bio`, `imageId`, `status`, `availability`, `promotionalImages`, `connections`, `role`) VALUES
